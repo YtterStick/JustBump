@@ -8,6 +8,8 @@
     "start": "next start -p 3000",
     "lint": "next lint",
     "test:api": "node test/run-api-tests.js",
+    "apply-schema": "node ./scripts/apply-schema.js",
+    "create-jbdb": "node ./scripts/create-jbdb.js",
     "test": "npm run test:api"
   },
   "dependencies": {
