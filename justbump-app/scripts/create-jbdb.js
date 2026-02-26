@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2/promise');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env.local') });
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
-const TARGET_DB = 'JBDB';
+const TARGET_DB = 'jbdb';
 
 (async () => {
   try {
@@ -22,15 +22,21 @@ const TARGET_DB = 'JBDB';
     // Remove any code fence markers (```sql / ```)
     sql = sql.replace(/```\w*\r?\n?/g, '');
 
-    // Replace database creation/USE entries to target DB
-    sql = sql.replace(/CREATE\s+DATABASE\s+IF\s+NOT\s+EXISTS\s+\w+\s*;?/i, `CREATE DATABASE IF NOT EXISTS ${TARGET_DB};`);
-    sql = sql.replace(/USE\s+\w+\s*;?/i, `USE ${TARGET_DB};`);
+    // Remove manual database creation and USE entries to avoid conflicts
+    sql = sql.replace(/CREATE\s+DATABASE\s+IF\s+NOT\s+EXISTS\s+\w+\s*[^;]*;?/gi, '');
+    sql = sql.replace(/ALTER\s+DATABASE\s+\w+\s*[^;]*;?/gi, '');
+    sql = sql.replace(/USE\s+\w+\s*;?/gi, '');
 
     const conn = await mysql.createConnection({ host, port, user, password, multipleStatements: true });
     console.log(`Connected to MySQL at ${host}:${port} as ${user}`);
 
-    console.log(`Ensuring database ${TARGET_DB} exists...`);
-    await conn.query(`CREATE DATABASE IF NOT EXISTS ${TARGET_DB} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
+    console.log(`Cleaning up old databases...`);
+    await conn.query(`DROP DATABASE IF EXISTS just_bump_db;`);
+    await conn.query(`DROP DATABASE IF EXISTS ${TARGET_DB};`);
+
+    console.log(`Creating database ${TARGET_DB} exists...`);
+    await conn.query(`CREATE DATABASE ${TARGET_DB} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
+    await conn.query(`USE ${TARGET_DB};`);
     console.log(`Applying schema to ${TARGET_DB}...`);
     await conn.query(sql);
     console.log('Schema applied successfully to', TARGET_DB);

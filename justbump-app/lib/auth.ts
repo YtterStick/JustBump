@@ -1,24 +1,48 @@
-import jwt from 'jsonwebtoken';
+import * as jose from 'jose';
 
 export type DecodedToken = {
   userId: number;
   email?: string;
+  role?: string;
   iat?: number;
   exp?: number;
 };
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'dev_jwt_secret');
 
-export function signToken(payload: { userId: number; email?: string }) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+export async function signToken(payload: { userId: number; email?: string; role?: string }) {
+  console.log('[Auth] Signing token for userId:', payload.userId);
+  return await new jose.SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('7d')
+    .sign(JWT_SECRET);
 }
 
-export function verifyToken(token: string): DecodedToken | null {
+export async function verifyToken(token: string): Promise<DecodedToken | null> {
   try {
-    return jwt.verify(token, JWT_SECRET) as DecodedToken;
-  } catch (err) {
+    const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+    return payload as unknown as DecodedToken;
+  } catch (err: any) {
+    console.error('[Auth] Token verification failed:', err.message);
     return null;
   }
+}
+
+
+export async function verifyAdminToken(token: string): Promise<DecodedToken | null> {
+  console.log('[Auth] Verifying admin token...');
+  const decoded = await verifyToken(token);
+  if (!decoded) {
+    console.log('[Auth] Decoded token is null');
+    return null;
+  }
+  console.log('[Auth] Decoded role:', decoded.role);
+  if (decoded.role !== 'Admin') {
+    console.log('[Auth] Role mismatch: expected Admin, got', decoded.role);
+    return null;
+  }
+  return decoded;
 }
 
 export async function getUserFromRequest(req: Request): Promise<DecodedToken | null> {
@@ -34,5 +58,5 @@ export async function getUserFromRequest(req: Request): Promise<DecodedToken | n
   }
 
   if (!token) return null;
-  return verifyToken(token);
+  return await verifyToken(token);
 }
