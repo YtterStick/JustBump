@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import { verifyAdminToken } from '../../../../lib/auth';
+import { logAdminAction } from '../../../../lib/logger';
 
 export async function GET(req: Request) {
     try {
@@ -10,7 +11,16 @@ export async function GET(req: Request) {
         const cards = await prisma.physicalCard.findMany({
             where: { deleted_at: null },
             include: {
-                calling_card: true,
+                calling_card: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
             },
             orderBy: { created_at: 'asc' },
         });
@@ -102,6 +112,15 @@ export async function POST(req: Request) {
             }
         });
 
+        await logAdminAction(
+            token.userId,
+            'REGISTER_CARD',
+            'PhysicalCard',
+            card.card_uid,
+            { card_id: card.card_id, card_type: card.card_type },
+            req
+        );
+
         return NextResponse.json(card);
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
@@ -126,8 +145,20 @@ export async function PATCH(req: Request) {
                 ...(card_uid && { card_uid }),
                 ...(card_type && { card_type }),
                 ...(status && { status }),
+                // Support unlinking
+                ...(body.hasOwnProperty('calling_card_id') && { calling_card_id: body.calling_card_id }),
+                ...(body.calling_card_id === null && { status: 'unassigned', assigned_at: null }),
             },
         });
+
+        await logAdminAction(
+            token.userId,
+            status === 'blocked' ? 'BLOCK_CARD' : (body.calling_card_id === null ? 'UNLINK_CARD' : 'UPDATE_CARD'),
+            'PhysicalCard',
+            updatedCard.card_uid,
+            { status, card_id: updatedCard.card_id },
+            req
+        );
 
         return NextResponse.json(updatedCard);
     } catch (error: any) {
@@ -145,12 +176,40 @@ export async function DELETE(req: Request) {
 
         if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
-        await prisma.physicalCard.update({
+        const card = await prisma.physicalCard.findUnique({
+            where: { card_id: parseInt(id) },
+            select: { calling_card_id: true, card_uid: true }
+        });
+
+        if (!card) return NextResponse.json({ error: 'Card not found' }, { status: 404 });
+
+        // Block deletion if linked OR if status is not unassigned
+        const cardWithStatus = await prisma.physicalCard.findUnique({
+            where: { card_id: parseInt(id) },
+            select: { calling_card_id: true, status: true }
+        });
+
+        if (cardWithStatus?.calling_card_id || cardWithStatus?.status !== 'unassigned') {
+            return NextResponse.json({
+                error: `Cannot delete card. It must be unlinked first (Current Status: ${cardWithStatus?.status}).`
+            }, { status: 400 });
+        }
+
+        const deletedCard = await prisma.physicalCard.update({
             where: { card_id: parseInt(id) },
             data: { deleted_at: new Date() }
         });
 
-        return NextResponse.json({ success: true });
+        await logAdminAction(
+            token.userId,
+            'DELETE_CARD',
+            'PhysicalCard',
+            deletedCard.card_uid,
+            { card_id: deletedCard.card_id },
+            req
+        );
+
+        return NextResponse.json({ message: 'Card deleted successfully' });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

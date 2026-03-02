@@ -42,7 +42,7 @@ export async function GET(req: Request) {
                     video_links: true,
                     external_links: true
                 },
-                orderBy: { created_at: 'desc' },
+                orderBy: { id: 'asc' },
                 skip,
                 take: limit,
             })

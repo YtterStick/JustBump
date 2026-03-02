@@ -9,9 +9,65 @@ interface Stat {
     color: string;
 }
 
+interface ActivityLog {
+    id: number;
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    details: string | null;
+    created_at: string;
+    admin: { email: string };
+}
+
+function getActionDotColor(action: string) {
+    if (action.includes('CREATE') || action.includes('REGISTER')) return 'bg-emerald-500';
+    if (action.includes('BLOCK') || action.includes('DELETE')) return 'bg-red-500';
+    if (action.includes('UPDATE') || action.includes('LINK')) return 'bg-blue-500';
+    if (action.includes('UNLINK')) return 'bg-amber-500';
+    return 'bg-gray-400';
+}
+
+function getActionLabel(action: string) {
+    const map: Record<string, string> = {
+        'CREATE_USER': 'User created',
+        'REGISTER_CARD': 'Card registered',
+        'LINK_CARD': 'Card linked',
+        'UNLINK_CARD': 'Card unlinked',
+        'BLOCK_CARD': 'Card blocked',
+        'UPDATE_CARD': 'Card updated',
+        'DELETE_CARD': 'Card deleted',
+    };
+    return map[action] || action.replace(/_/g, ' ').toLowerCase().replace(/^\w/, c => c.toUpperCase());
+}
+
+function getActionDetail(log: ActivityLog) {
+    const parts: string[] = [];
+    if (log.target_type) parts.push(log.target_type);
+    if (log.target_id) parts.push(`#${log.target_id}`);
+    parts.push(`by ${log.admin.email}`);
+    return parts.join(' · ');
+}
+
+function relativeTime(dateStr: string) {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return 'Just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    const diffDay = Math.floor(diffHr / 24);
+    if (diffDay < 7) return `${diffDay}d ago`;
+    return date.toLocaleDateString();
+}
+
 export default function AdminDashboard() {
     const [stats, setStats] = useState<Stat[]>([]);
     const [loading, setLoading] = useState(true);
+    const [activities, setActivities] = useState<ActivityLog[]>([]);
+    const [activitiesLoading, setActivitiesLoading] = useState(true);
 
     useEffect(() => {
         fetch('/api/admin/stats')
@@ -20,6 +76,14 @@ export default function AdminDashboard() {
                 if (data.stats) setStats(data.stats);
                 setLoading(false);
             });
+
+        fetch('/api/admin/logs?page=1&limit=3')
+            .then(res => res.json())
+            .then(data => {
+                if (data.logs) setActivities(data.logs);
+                setActivitiesLoading(false);
+            })
+            .catch(() => setActivitiesLoading(false));
     }, []);
 
     const iconMap: Record<string, React.ReactNode> = {
@@ -46,13 +110,13 @@ export default function AdminDashboard() {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
                     {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-32 bg-gray-100 rounded-2xl border border-gray-100"></div>
+                        <div key={i} className="h-32 bg-gray-100 rounded-2xl border border-gray-200 shadow-sm animate-pulse"></div>
                     ))}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {stats.map((stat) => (
-                        <div key={stat.label} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                        <div key={stat.label} className="bg-white p-6 rounded-2xl border border-gray-200 shadow transition-all hover:shadow-md">
                             <div className="flex items-center justify-between mb-4">
                                 <div className={`p-2 rounded-xl ${colorMap[stat.color]}`}>
                                     {iconMap[stat.icon]}
@@ -68,23 +132,43 @@ export default function AdminDashboard() {
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-6">Recent Activity</h3>
-                    <div className="space-y-6">
-                        <div className="flex items-start gap-4">
-                            <div className="w-2 h-2 rounded-full bg-brand-500 mt-2"></div>
-                            <div>
-                                <p className="text-sm text-gray-900 font-medium">New card registered</p>
-                                <p className="text-xs text-gray-400 mt-0.5">Physical card UID 055 added to inventory</p>
+                <div className="lg:col-span-2 bg-white p-8 rounded-2xl border border-gray-200 shadow">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                        <a
+                            href="/admin/logs"
+                            className="text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors"
+                        >
+                            View All →
+                        </a>
+                    </div>
+                    <div className="space-y-5">
+                        {activitiesLoading ? (
+                            [...Array(3)].map((_, i) => (
+                                <div key={i} className="flex items-start gap-4 animate-pulse">
+                                    <div className="w-2 h-2 rounded-full bg-gray-200 mt-2" />
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-3.5 w-32 bg-gray-100 rounded" />
+                                        <div className="h-3 w-48 bg-gray-50 rounded" />
+                                    </div>
+                                </div>
+                            ))
+                        ) : activities.length === 0 ? (
+                            <div className="text-center py-6">
+                                <p className="text-sm text-gray-400">No activity recorded yet.</p>
                             </div>
-                        </div>
-                        <div className="flex items-start gap-4">
-                            <div className="w-2 h-2 rounded-full bg-purple-500 mt-2"></div>
-                            <div>
-                                <p className="text-sm text-gray-900 font-medium">User profile updated</p>
-                                <p className="text-xs text-gray-400 mt-0.5">Admin updated settings for admin@justbump.com</p>
-                            </div>
-                        </div>
+                        ) : (
+                            activities.map((log) => (
+                                <div key={log.id} className="flex items-start gap-4 group">
+                                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${getActionDotColor(log.action)}`} />
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[15px] text-gray-900 font-medium">{getActionLabel(log.action)}</p>
+                                        <p className="text-sm text-gray-400 mt-0.5 truncate">{getActionDetail(log)}</p>
+                                    </div>
+                                    <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap mt-1">{relativeTime(log.created_at)}</span>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 

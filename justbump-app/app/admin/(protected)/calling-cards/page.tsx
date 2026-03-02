@@ -350,7 +350,7 @@ export default function CallingCardsPage() {
             </div>
 
             {/* Compressed Table */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow overflow-hidden">
                 {loading ? (
                     <table className="w-full text-left">
                         <thead className="border-b border-gray-100 bg-surface-50">

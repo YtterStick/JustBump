@@ -218,13 +218,16 @@ export default function PhysicalCardsPage() {
     }
 
     async function handleDelete(id: number) {
+        console.log('handleDelete called for id:', id);
         setIsDeleteLoading(true);
         try {
             const res = await fetch(`/api/admin/physical-cards?id=${id}`, { method: 'DELETE' });
             if (!res.ok) {
                 const err = await res.json();
+                console.error('Delete failed:', err.error);
                 throw new Error(err.error || 'Failed to delete card');
             }
+            console.log('Delete successful');
             setDeletingId(null);
             fetchCards();
         } catch (err: any) {
@@ -234,6 +237,19 @@ export default function PhysicalCardsPage() {
             setIsDeleteLoading(false);
         }
     }
+
+    function handleUnlink(card: any) {
+        const userId = card.calling_card?.user?.id;
+        if (!userId) {
+            setErrorMessage('Could not find user associated with this card.');
+            return;
+        }
+
+        console.log('Redirecting to users page for unlinking. userId:', userId);
+        window.location.href = `/admin/users?unlink_user_id=${userId}`;
+    }
+
+
 
     const badgeColor = {
         empty: '',
@@ -274,7 +290,7 @@ export default function PhysicalCardsPage() {
             {/* Grid: Left = Register, Right = Filters + Table */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* LEFT: Registration Form */}
-                <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 h-fit">
+                <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow p-6 h-fit">
                     <div className="flex items-center gap-2 mb-5">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Register Cards</h3>
@@ -401,7 +417,7 @@ export default function PhysicalCardsPage() {
                 {/* RIGHT: Filters + Table */}
                 <div className="lg:col-span-2 space-y-4">
                     {/* Filters */}
-                    <div className="flex flex-wrap gap-3 items-end bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex flex-wrap gap-3 items-end bg-white p-4 rounded-2xl border border-gray-200 shadow">
                         <div className="flex-1 min-w-[200px]">
                             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Search</label>
                             <div className="relative">
@@ -447,7 +463,7 @@ export default function PhysicalCardsPage() {
                     </div>
 
                     {/* Data Table */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow overflow-hidden">
                         {loading ? (
                             <table className="w-full text-left">
                                 <thead className="border-b border-gray-100 bg-surface-50">
@@ -575,14 +591,34 @@ export default function PhysicalCardsPage() {
             )}
 
             {/* Delete Confirmation Modal */}
-            <DeleteConfirmationModal
-                isOpen={deletingId !== null}
-                title="Delete Card?"
-                description="Are you sure you want to remove this card from your inventory? This action cannot be undone."
-                onConfirm={() => deletingId && handleDelete(deletingId)}
-                onClose={() => setDeletingId(null)}
-                isLoading={isDeleteLoading}
-            />
+            {(() => {
+                const cardToDelete = cards.find(c => c.card_id === deletingId);
+                // ROBUST CHECK: Linked if calling_card exists OR status is not unassigned
+                const isLinked = !!(cardToDelete?.calling_card || (cardToDelete?.status && cardToDelete.status !== 'unassigned'));
+
+                return (
+                    <DeleteConfirmationModal
+                        isOpen={deletingId !== null}
+                        title={isLinked ? "Unlink Card First?" : "Delete Card?"}
+                        confirmLabel={isLinked ? "Unlink Card" : "Delete"}
+                        description={
+                            isLinked
+                                ? `This card is currently ${cardToDelete?.status === 'assigned' ? 'LINKED' : cardToDelete?.status?.toUpperCase()} to a profile. You MUST unlink it first before it can be deleted from the inventory.`
+                                : "Are you sure you want to remove this card from your inventory? This action cannot be undone."
+                        }
+                        onConfirm={() => {
+                            if (!deletingId) return;
+                            if (isLinked && cardToDelete) {
+                                handleUnlink(cardToDelete);
+                            } else {
+                                handleDelete(deletingId);
+                            }
+                        }}
+                        onClose={() => setDeletingId(null)}
+                        isLoading={isDeleteLoading}
+                    />
+                );
+            })()}
         </div>
     );
 }
@@ -599,9 +635,26 @@ function EditSlideOver({ card, onClose, onSave, loading, error }: {
     const [type, setType] = useState(card.card_type);
     const [status, setStatus] = useState(card.status);
 
+    const isLinked = !!card.calling_card;
+
     const handleClose = () => {
         setIsClosing(true);
         setTimeout(onClose, 200);
+    };
+
+    const handleSave = () => {
+        if (status === 'blocked' && isLinked) {
+            // Force unlink if blocking
+            onSave({
+                card_id: card.card_id,
+                card_uid: uid,
+                card_type: type,
+                status,
+                calling_card_id: null
+            });
+        } else {
+            onSave({ card_id: card.card_id, card_uid: uid, card_type: type, status });
+        }
     };
 
     return (
@@ -657,6 +710,15 @@ function EditSlideOver({ card, onClose, onSave, loading, error }: {
                         </select>
                     </div>
 
+                    {card.calling_card && status === 'blocked' && (
+                        <div className="p-3 rounded-lg bg-amber-50 border border-amber-100 text-amber-700 text-xs font-medium flex items-start gap-2 animate-in slide-in-from-top-1">
+                            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                            <p>Warning: This card is linked to <strong>{card.calling_card.full_name}</strong>. Blocking it will automatically <strong>UNLINK</strong> it first.</p>
+                        </div>
+                    )}
+
                     {error && (
                         <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs font-medium flex items-center gap-2">
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -669,11 +731,11 @@ function EditSlideOver({ card, onClose, onSave, loading, error }: {
 
                 <div className="p-6 border-t border-gray-100">
                     <button
-                        onClick={() => onSave({ card_id: card.card_id, card_uid: uid, card_type: type, status })}
+                        onClick={handleSave}
                         disabled={loading}
                         className="w-full py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
                     >
-                        {loading ? 'Saving...' : 'Save Changes'}
+                        {loading ? 'Saving...' : (status === 'blocked' && isLinked ? 'Unlink & Block' : 'Save Changes')}
                     </button>
                 </div>
             </div>
