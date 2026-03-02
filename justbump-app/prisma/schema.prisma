@@ -65,22 +65,11 @@ model CallingCard {
   bio_text                String?   @db.Text
   contact_value           String?   @db.VarChar(255)
   contact_action_type     ContactAction @default(both)
-  bank_payment_provider   String?   @db.VarChar(100)
-  bank_account_name       String?   @db.VarChar(100)
-  bank_account_number     String?   @db.VarChar(50)
-  bank_branch_code        String?   @db.VarChar(20)
-  social_platform_name    String?   @db.VarChar(50)
-  social_handle           String?   @db.VarChar(100)
-  social_display_order    Int       @default(0)
-  video_title             String?   @db.VarChar(100)
-  video_source            String?   @db.Text
-  video_description       String?   @db.Text
-  video_display_order     Int       @default(0)
-  external_link_label     String?   @db.VarChar(100)
-  external_link_url       String?   @db.VarChar(512)
-  external_link_display_order Int   @default(0)
   slug                    String    @unique @db.VarChar(50)
   sharing_id              String    @unique @db.Char(36)
+  theme_primary_color     String    @default("#000000") @db.VarChar(7)
+  theme_secondary_color   String    @default("#FFFFFF") @db.VarChar(7)
+  theme_background_color  String    @default("#F9FAFB") @db.VarChar(7)
   is_active               Boolean   @default(true) @db.TinyInt
   created_by              Int?
   updated_by              Int?
@@ -96,8 +85,62 @@ model CallingCard {
   deleterUser             User?     @relation("CardDeletedBy", fields: [deleted_by], references: [id], onDelete: SetNull)
   physical_cards          PhysicalCard[]
   analytics               CardAnalytic[]
+  
+  bank_details            BankDetail[]
+  social_links            SocialLink[]
+  video_links             VideoLink[]
+  external_links          ExternalLink[]
 
   @@map("calling_cards")
+}
+
+model BankDetail {
+  id                    Int         @id @default(autoincrement())
+  calling_card_id       Int
+  provider              String      @db.VarChar(100)
+  account_name          String      @db.VarChar(100)
+  account_number        String      @db.VarChar(50)
+  branch_code           String?     @db.VarChar(20)
+  display_order         Int         @default(0)
+  
+  calling_card          CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+  @@map("bank_details")
+}
+
+model SocialLink {
+  id                    Int         @id @default(autoincrement())
+  calling_card_id       Int
+  platform              String      @db.VarChar(50)
+  url                   String      @db.VarChar(512)
+  handle                String?     @db.VarChar(100)
+  display_order         Int         @default(0)
+
+  calling_card          CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+  @@map("social_links")
+}
+
+model VideoLink {
+  id                    Int         @id @default(autoincrement())
+  calling_card_id       Int
+  title                 String?     @db.VarChar(100)
+  url                   String      @db.Text
+  thumbnail_url         String?     @db.VarChar(512)
+  description           String?     @db.Text
+  display_order         Int         @default(0)
+
+  calling_card          CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+  @@map("video_links")
+}
+
+model ExternalLink {
+  id                    Int         @id @default(autoincrement())
+  calling_card_id       Int
+  label                 String      @db.VarChar(100)
+  url                   String      @db.VarChar(512)
+  display_order         Int         @default(0)
+
+  calling_card          CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+  @@map("external_links")
 }
 
 enum ContactAction {

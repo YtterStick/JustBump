@@ -5,9 +5,12 @@ import { useState } from 'react';
 
 interface HeaderProps {
     title?: string;
+    isCollapsed?: boolean;
+    onMenuClick?: () => void;
+    onCollapseToggle?: () => void;
 }
 
-export default function Header({ title = 'Dashboard' }: HeaderProps) {
+export default function Header({ title = 'Dashboard', isCollapsed, onMenuClick, onCollapseToggle }: HeaderProps) {
     const router = useRouter();
     const [showMenu, setShowMenu] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
@@ -23,8 +26,33 @@ export default function Header({ title = 'Dashboard' }: HeaderProps) {
     }
 
     return (
-        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-8">
-            <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 lg:px-8">
+            <div className="flex items-center gap-4">
+                {/* Mobile Toggle */}
+                <button
+                    onClick={onMenuClick}
+                    className="p-2 -ml-2 text-gray-400 hover:text-gray-600 lg:hidden"
+                    aria-label="Open sidebar"
+                >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
+
+                {/* Desktop Collapse Toggle */}
+                <button
+                    onClick={onCollapseToggle}
+                    className="hidden lg:flex p-2 -ml-2 text-gray-400 hover:text-gray-600 transition-transform duration-300"
+                    style={{ transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+
+                <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+            </div>
 
             {/* User menu */}
             <div className="relative">

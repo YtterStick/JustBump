@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
                 if (data.error === 'Invalid credentials' || data.error === 'Access denied') {
                     setEmailError(true);
                     setPasswordError(true);
-                    setPassword(''); // Clear to show placeholder error
+                    setPassword('');
                 }
                 return;
             }

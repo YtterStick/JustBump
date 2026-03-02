@@ -12,19 +12,51 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const cards = await prisma.callingCard.findMany({
-            where: { deleted_at: null },
-            include: {
-                user: {
-                    select: {
-                        email: true
-                    }
-                }
-            },
-            orderBy: { created_at: 'desc' },
-        });
+        const { searchParams } = new URL(req.url);
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('limit') || '10');
+        const search = searchParams.get('search') || '';
+        const skip = (page - 1) * limit;
 
-        return NextResponse.json(cards);
+        const whereClause: any = {
+            deleted_at: null,
+            OR: search ? [
+                { full_name: { contains: search } },
+                { slug: { contains: search } },
+                { user: { email: { contains: search } } }
+            ] : undefined
+        };
+
+        const [total, cards] = await Promise.all([
+            prisma.callingCard.count({ where: whereClause }),
+            prisma.callingCard.findMany({
+                where: whereClause,
+                include: {
+                    user: {
+                        select: {
+                            email: true
+                        }
+                    },
+                    bank_details: true,
+                    social_links: true,
+                    video_links: true,
+                    external_links: true
+                },
+                orderBy: { created_at: 'desc' },
+                skip,
+                take: limit,
+            })
+        ]);
+
+        return NextResponse.json({
+            data: cards,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
     } catch (error: any) {
         console.error('[API Calling Cards] Error:', error.message);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

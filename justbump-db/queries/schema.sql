@@ -3,12 +3,24 @@ ALTER DATABASE jbdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE jbdb;
 
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS connections;
+DROP TABLE IF EXISTS card_analytics;
+DROP TABLE IF EXISTS physical_cards;
+DROP TABLE IF EXISTS bank_details;
+DROP TABLE IF EXISTS social_links;
+DROP TABLE IF EXISTS video_links;
+DROP TABLE IF EXISTS external_links;
+DROP TABLE IF EXISTS calling_cards;
+DROP TABLE IF EXISTS users;
+SET FOREIGN_KEY_CHECKS = 1;
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     phone_number VARCHAR(20) DEFAULT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role ENUM('jbuser', 'jbadmin') DEFAULT 'jbuser',
+    role ENUM('User', 'Admin') DEFAULT 'User',
     email_verified TINYINT(1) DEFAULT 0,
     phone_number_verified TINYINT(1) DEFAULT 0,
     failed_attempts INT DEFAULT 0,
@@ -42,22 +54,11 @@ CREATE TABLE calling_cards (
     bio_text TEXT,
     contact_value VARCHAR(255) DEFAULT NULL,
     contact_action_type ENUM('call', 'message', 'both') DEFAULT 'both',
-    bank_payment_provider VARCHAR(100) DEFAULT NULL,
-    bank_account_name VARCHAR(100) DEFAULT NULL,
-    bank_account_number VARCHAR(50) DEFAULT NULL,
-    bank_branch_code VARCHAR(20) DEFAULT NULL,
-    social_platform_name VARCHAR(50) DEFAULT NULL,
-    social_handle VARCHAR(100) DEFAULT NULL,
-    social_display_order INT DEFAULT 0,
-    video_title VARCHAR(100) DEFAULT NULL,
-    video_source TEXT,
-    video_description TEXT,
-    video_display_order INT DEFAULT 0,
-    external_link_label VARCHAR(100) DEFAULT NULL,
-    external_link_url VARCHAR(512) DEFAULT NULL,
-    external_link_display_order INT DEFAULT 0,
     slug VARCHAR(50) NOT NULL,
     sharing_id CHAR(36) NOT NULL,
+    theme_primary_color VARCHAR(7) DEFAULT '#000000',
+    theme_secondary_color VARCHAR(7) DEFAULT '#FFFFFF',
+    theme_background_color VARCHAR(7) DEFAULT '#F9FAFB',
     is_active TINYINT(1) DEFAULT 1,
     created_by INT NULL,
     updated_by INT NULL,
@@ -72,6 +73,47 @@ CREATE TABLE calling_cards (
     CONSTRAINT fk_cards_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL,
     CONSTRAINT fk_cards_updated_by FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL,
     CONSTRAINT fk_cards_deleted_by FOREIGN KEY (deleted_by) REFERENCES users (id) ON DELETE SET NULL
+);
+
+CREATE TABLE bank_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    calling_card_id INT NOT NULL,
+    provider VARCHAR(100) NOT NULL,
+    account_name VARCHAR(100) NOT NULL,
+    account_number VARCHAR(50) NOT NULL,
+    branch_code VARCHAR(20) DEFAULT NULL,
+    display_order INT DEFAULT 0,
+    CONSTRAINT fk_bank_details_card FOREIGN KEY (calling_card_id) REFERENCES calling_cards (id) ON DELETE CASCADE
+);
+
+CREATE TABLE social_links (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    calling_card_id INT NOT NULL,
+    platform VARCHAR(50) NOT NULL,
+    url VARCHAR(512) NOT NULL,
+    handle VARCHAR(100) DEFAULT NULL,
+    display_order INT DEFAULT 0,
+    CONSTRAINT fk_social_links_card FOREIGN KEY (calling_card_id) REFERENCES calling_cards (id) ON DELETE CASCADE
+);
+
+CREATE TABLE video_links (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    calling_card_id INT NOT NULL,
+    title VARCHAR(100) DEFAULT NULL,
+    url TEXT NOT NULL,
+    thumbnail_url VARCHAR(512) DEFAULT NULL,
+    description TEXT,
+    display_order INT DEFAULT 0,
+    CONSTRAINT fk_video_links_card FOREIGN KEY (calling_card_id) REFERENCES calling_cards (id) ON DELETE CASCADE
+);
+
+CREATE TABLE external_links (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    calling_card_id INT NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    url VARCHAR(512) NOT NULL,
+    display_order INT DEFAULT 0,
+    CONSTRAINT fk_external_links_card FOREIGN KEY (calling_card_id) REFERENCES calling_cards (id) ON DELETE CASCADE
 );
 
 CREATE TABLE physical_cards (

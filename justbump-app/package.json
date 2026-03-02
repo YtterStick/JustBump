@@ -9,7 +9,8 @@
     "lint": "next lint",
     "apply-schema": "node ./scripts/apply-schema.js",
     "create-jbdb": "node ./scripts/create-jbdb.js",
-    "seed-admin": "npx ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" scripts/seed-admin.ts"
+    "seed-admin": "npx ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" scripts/seed-admin.ts",
+    "seed-dummy-cards": "npx ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" scripts/seed-dummy-cards.ts"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.4.1",

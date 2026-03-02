@@ -1,7 +1,22 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import bcrypt from 'bcryptjs';
+import * as dotenv from 'dotenv';
+import path from 'path';
 
-const prisma = new PrismaClient();
+// Load .env from parent directory
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const poolConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    port: Number(process.env.DB_PORT || 3306),
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'jbdb',
+};
+
+const adapter = new PrismaMariaDb(poolConfig);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
     const email = 'admin@justbump.com';
@@ -22,7 +37,7 @@ async function main() {
         data: {
             email,
             password_hash,
-            role: 'jbadmin',
+            role: 'Admin',
             email_verified: true,
             is_active: true,
         },
@@ -32,7 +47,7 @@ async function main() {
     console.log(`   ID:       ${user.id}`);
     console.log(`   Email:    ${email}`);
     console.log(`   Password: ${password}`);
-    console.log(`   Role:     jbadmin\n`);
+    console.log(`   Role:     Admin\n`);
     console.log('   ⚠  Change this password in production!\n');
 }
 
