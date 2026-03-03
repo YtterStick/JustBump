@@ -7,8 +7,9 @@ import ProfileTab from './editor/ProfileTab';
 import ContactsTab from './editor/ContactsTab';
 import ContentTab from './editor/ContentTab';
 import ThemeTab from './editor/ThemeTab';
+import ProductsTab from './editor/ProductsTab';
 
-export default function DashboardEditor({ onLinkNew }: { onLinkNew?: () => void }) {
+export default function DashboardEditor() {
     const {
         card,
         loading,
@@ -24,7 +25,7 @@ export default function DashboardEditor({ onLinkNew }: { onLinkNew?: () => void 
         handlePhoneChange,
         handleFileUpload,
         setCard
-    } = useDashboardEditor(onLinkNew);
+    } = useDashboardEditor();
 
     if (loading) {
         return (
@@ -41,7 +42,7 @@ export default function DashboardEditor({ onLinkNew }: { onLinkNew?: () => void 
         <div className="max-w-6xl mx-auto py-12 px-6">
             <div className="flex flex-col lg:flex-row gap-12">
                 {/* Fixed Preview Side (Desktop) */}
-                <PreviewCard card={card} onLinkNew={onLinkNew} />
+                <PreviewCard card={card} />
 
                 {/* Main Editor Section */}
                 <form 
@@ -55,8 +56,8 @@ export default function DashboardEditor({ onLinkNew }: { onLinkNew?: () => void 
                     <SaveBar isDirty={isDirty} saving={saving} message={message} />
 
                     {/* Tab Navigation */}
-                    <div className="flex p-1.5 bg-gray-100 rounded-2xl w-fit gap-1 shadow-inner">
-                        {(['profile', 'contacts', 'content', 'theme'] as const).map(tab => (
+                    <div className="flex p-1.5 bg-gray-100 rounded-2xl w-fit gap-1 shadow-inner overflow-x-auto max-w-full">
+                        {(['profile', 'contacts', 'content', 'theme', 'products'] as const).map(tab => (
                             <button
                                 key={tab}
                                 type="button"
@@ -102,6 +103,13 @@ export default function DashboardEditor({ onLinkNew }: { onLinkNew?: () => void 
 
                         {activeTab === 'theme' && (
                             <ThemeTab 
+                                card={card} 
+                                setCard={setCard} 
+                            />
+                        )}
+
+                        {activeTab === 'products' && (
+                            <ProductsTab 
                                 card={card} 
                                 setCard={setCard} 
                             />

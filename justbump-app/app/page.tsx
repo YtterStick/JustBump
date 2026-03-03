@@ -84,13 +84,15 @@ export default function Home() {
       {(!user.is_activated || showActivation) ? (
         <ActivationFlow
           userEmail={user.email}
+          slug={user.calling_card?.slug}
+          physicalCards={user.calling_card?.physical_cards || []}
           onActivated={() => {
             fetchUser();
             setShowActivation(false);
           }}
         />
       ) : (
-        <DashboardEditor onLinkNew={() => setShowActivation(true)} />
+        <DashboardEditor />
       )}
     </main>
   );

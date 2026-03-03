@@ -14,13 +14,12 @@ export default function AdminDashboardLayout({ children }: { children: ReactNode
                 isOpen={isSidebarOpen}
                 isCollapsed={isSidebarCollapsed}
                 onClose={() => setIsSidebarOpen(false)}
+                onCollapseToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             />
             <div className={`flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
                 <Header
                     title="Dashboard"
-                    isCollapsed={isSidebarCollapsed}
                     onMenuClick={() => setIsSidebarOpen(true)}
-                    onCollapseToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                 />
                 <main className="flex-1 p-4 lg:p-8">{children}</main>
             </div>

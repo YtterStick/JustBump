@@ -147,7 +147,11 @@ export async function PATCH(req: Request) {
                 ...(status && { status }),
                 // Support unlinking
                 ...(body.hasOwnProperty('calling_card_id') && { calling_card_id: body.calling_card_id }),
-                ...(body.calling_card_id === null && { status: 'unassigned', assigned_at: null }),
+                ...(body.hasOwnProperty('calling_card_id') && body.calling_card_id === null && {
+                    status: 'unassigned',
+                    assigned_at: null,
+                    activated_at: null,
+                }),
             },
         });
 

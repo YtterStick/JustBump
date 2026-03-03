@@ -20,6 +20,7 @@ export async function GET(req: Request) {
           select: {
             id: true,
             full_name: true,
+            slug: true,
             is_active: true,
             physical_cards: {
               where: {

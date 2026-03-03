@@ -29,8 +29,8 @@ export async function GET(req: Request) {
                     select: {
                         id: true,
                         physical_cards: {
-                            where: { deleted_at: null, status: 'assigned' },
-                            select: { card_id: true, card_uid: true, card_type: true }
+                            where: { deleted_at: null, status: { in: ['assigned', 'active'] } },
+                            select: { card_id: true, card_uid: true, card_type: true, status: true }
                         }
                     }
                 }

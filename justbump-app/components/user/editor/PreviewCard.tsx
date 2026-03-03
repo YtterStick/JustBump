@@ -66,7 +66,7 @@ const getActionIcons = (actionType: string) => {
     );
 };
 
-export default function PreviewCard({ card, onLinkNew }: { card: any, onLinkNew?: () => void }) {
+export default function PreviewCard({ card }: { card: any }) {
     if (!card) return null;
 
     return (
@@ -196,28 +196,6 @@ export default function PreviewCard({ card, onLinkNew }: { card: any, onLinkNew?
                         </a>
                     </div>
                 </div>
-            </div>
-
-            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
-                <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Products linked</p>
-                    <span className="text-[10px] font-black text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">{card.physical_cards.length}</span>
-                </div>
-                <div className="space-y-2">
-                    {card.physical_cards.map((p: any) => (
-                        <div key={p.card_uid} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-xs font-mono font-bold text-gray-900">{p.card_uid}</span>
-                            <span className="ml-auto text-[8px] font-black text-gray-400 uppercase tracking-widest">Active</span>
-                        </div>
-                    ))}
-                </div>
-                <button
-                    onClick={onLinkNew}
-                    className="w-full py-3 rounded-xl border border-dashed border-gray-200 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50/50 transition-all"
-                >
-                    + Link New Product
-                </button>
             </div>
         </div>
     );

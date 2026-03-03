@@ -9,6 +9,7 @@ interface LinkedCard {
     card_id: number;
     card_uid: string;
     card_type: string;
+    status: string;
 }
 
 interface User {
@@ -700,9 +701,14 @@ function UnlinkCardModal({ user, onClose, onUnlinked }: {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <code className="text-sm font-semibold text-gray-900 tracking-wide">{card.card_uid}</code>
-                                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mt-0.5">
-                                                {card.card_type === 'Card' && '🪪'}{card.card_type === 'Sticker' && '🏷️'}{card.card_type === 'Keychain' && '🔑'}{card.card_type === 'Other' && '📦'} {card.card_type}
-                                            </p>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+                                                    {card.card_type === 'Card' && '🪪'}{card.card_type === 'Sticker' && '🏷️'}{card.card_type === 'Keychain' && '🔑'}{card.card_type === 'Other' && '📦'} {card.card_type}
+                                                </p>
+                                                <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${card.status === 'active' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-50 text-blue-500'}`}>
+                                                    {card.status}
+                                                </span>
+                                            </div>
                                         </div>
                                         {selectedCardId === card.card_id && (
                                             <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>

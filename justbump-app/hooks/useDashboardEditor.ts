@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { AsYouType, CountryCode } from 'libphonenumber-js';
 
-export function useDashboardEditor(onLinkNew?: () => void) {
+export function useDashboardEditor() {
     const [card, setCard] = useState<any>(null);
     const [initialCard, setInitialCard] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
-    const [activeTab, setActiveTab] = useState<'profile' | 'contacts' | 'content' | 'theme'>('profile');
+    const [activeTab, setActiveTab] = useState<'profile' | 'contacts' | 'content' | 'theme' | 'products'>('profile');
     const [uploading, setUploading] = useState(false);
     const [selectedCountry, setSelectedCountry] = useState<CountryCode>('PH');
 

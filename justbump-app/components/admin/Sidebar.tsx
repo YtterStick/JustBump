@@ -55,9 +55,10 @@ interface SidebarProps {
     isOpen: boolean;
     isCollapsed: boolean;
     onClose: () => void;
+    onCollapseToggle: () => void;
 }
 
-export default function Sidebar({ isOpen, isCollapsed, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, isCollapsed, onClose, onCollapseToggle }: SidebarProps) {
     const pathname = usePathname();
 
     return (
@@ -75,7 +76,7 @@ export default function Sidebar({ isOpen, isCollapsed, onClose }: SidebarProps) 
                     } ${isCollapsed ? 'w-64 lg:w-20' : 'w-64'}`}
             >
                 {/* Brand */}
-                <div className={`h-16 flex items-center border-b border-gray-100 transition-all duration-300 ${isCollapsed ? 'px-4 lg:justify-center' : 'px-6'}`}>
+                <div className={`h-16 flex items-center border-b border-gray-100 transition-all duration-300 relative ${isCollapsed ? 'px-4 lg:justify-center' : 'px-6'}`}>
                     <Link href="/admin" className="flex items-center justify-center py-2">
                         <img
                             src="/jblogo.png"
@@ -83,6 +84,18 @@ export default function Sidebar({ isOpen, isCollapsed, onClose }: SidebarProps) 
                             className="h-10 w-auto object-contain transition-all duration-300"
                         />
                     </Link>
+
+                    {/* Desktop Collapse Toggle */}
+                    <button
+                        onClick={onCollapseToggle}
+                        className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white border border-gray-100 rounded-full items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-200 shadow-sm transition-all duration-300 z-50"
+                        style={{ transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+                        </svg>
+                    </button>
                 </div>
 
                 {/* Nav */}

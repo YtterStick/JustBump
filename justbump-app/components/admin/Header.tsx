@@ -5,12 +5,10 @@ import { useState } from 'react';
 
 interface HeaderProps {
     title?: string;
-    isCollapsed?: boolean;
     onMenuClick?: () => void;
-    onCollapseToggle?: () => void;
 }
 
-export default function Header({ title = 'Dashboard', isCollapsed, onMenuClick, onCollapseToggle }: HeaderProps) {
+export default function Header({ title = 'Dashboard', onMenuClick }: HeaderProps) {
     const router = useRouter();
     const [showMenu, setShowMenu] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
@@ -39,17 +37,6 @@ export default function Header({ title = 'Dashboard', isCollapsed, onMenuClick, 
                     </svg>
                 </button>
 
-                {/* Desktop Collapse Toggle */}
-                <button
-                    onClick={onCollapseToggle}
-                    className="hidden lg:flex p-2 -ml-2 text-gray-400 hover:text-gray-600 transition-transform duration-300"
-                    style={{ transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                    aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
-                    </svg>
-                </button>
 
                 <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
             </div>
