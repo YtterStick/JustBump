@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query } from '../../../../lib/db';
+import { prisma } from '../../../../lib/prisma';
 import { getUserFromRequest } from '../../../../lib/auth';
 
 export async function GET(req: Request) {
@@ -7,13 +7,45 @@ export async function GET(req: Request) {
     const token = await getUserFromRequest(req);
     if (!token) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const rows: any = await query(
-      'SELECT id, email, phone_number, account_type, is_active, created_at FROM users WHERE id = ? LIMIT 1',
-      [token.userId]
-    );
-    if (!Array.isArray(rows) || rows.length === 0) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    const user = await prisma.user.findUnique({
+      where: { id: token.userId },
+      select: {
+        id: true,
+        email: true,
+        phone_number: true,
+        role: true,
+        is_active: true,
+        created_at: true,
+        calling_card: {
+          select: {
+            id: true,
+            full_name: true,
+            is_active: true,
+            physical_cards: {
+              where: {
+                status: 'active',
+                deleted_at: null
+              },
+              select: {
+                card_id: true,
+                card_uid: true,
+                status: true
+              }
+            }
+          }
+        }
+      }
+    });
 
-    return NextResponse.json(rows[0]);
+    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+    // Determine activation status
+    const is_activated = !!user.calling_card && user.calling_card.physical_cards.length > 0;
+
+    return NextResponse.json({
+      ...user,
+      is_activated
+    });
   } catch (err) {
     console.error('me error', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

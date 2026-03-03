@@ -1,0 +1,16 @@
+import { NextResponse } from 'next/server';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { getUserFromRequest } from '../../../../lib/auth';
+
+export async function POST(req: Request) {
+    try {
+        const token = await getUserFromRequest(req);
+        if (!token) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+
+        const formData = await req.json(); // Wait, regular FormData might be easier for files
+        // Let's use standard formData processing for Next.js 13+ App Router
+    } catch (err) {
+        return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    }
+}

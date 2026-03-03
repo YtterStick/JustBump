@@ -15,7 +15,7 @@ if (!globalForPrisma.prisma) {
         database: process.env.DB_NAME || 'jbdb',
     };
 
-    console.log('Pool Config:', { ...poolConfig, password: '***' });
+    console.log('Pool Config [DEBUG]:', { ...poolConfig, password: poolConfig.password ? 'HIDDEN(' + poolConfig.password.length + ')' : 'EMPTY' });
 
     try {
         const adapter = new PrismaMariaDb(poolConfig);

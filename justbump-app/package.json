@@ -20,6 +20,7 @@
     "dotenv": "^16.0.3",
     "jose": "^6.1.3",
     "jsonwebtoken": "^9.0.0",
+    "libphonenumber-js": "^1.12.38",
     "mysql2": "^3.3.0",
     "next": "13.4.12",
     "react": "18.2.0",

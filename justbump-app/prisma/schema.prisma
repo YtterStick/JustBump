@@ -53,9 +53,9 @@ model CallingCard {
   full_name              String         @db.VarChar(100)
   job_title              String?        @db.VarChar(100)
   company                String?        @db.VarChar(100)
-  headline               String?        @db.VarChar(255)
   address                String?        @db.Text
   profile_image_url      String?        @db.VarChar(512)
+  cover_image_url        String?        @db.VarChar(512)
   bio_label              String?        @db.VarChar(50)
   bio_text               String?        @db.Text
   contact_value          String?        @db.VarChar(255)
@@ -64,7 +64,10 @@ model CallingCard {
   sharing_id             String         @unique @db.Char(36)
   theme_primary_color    String         @default("#000000") @db.VarChar(7)
   theme_secondary_color  String         @default("#FFFFFF") @db.VarChar(7)
+  theme_text_color       String         @default("#FFFFFF") @db.VarChar(7)
   theme_background_color String         @default("#F9FAFB") @db.VarChar(7)
+  theme_layout           String         @default("standard") @db.VarChar(50)
+  theme_font             String         @default("inter") @db.VarChar(50)
   is_active              Boolean        @default(true)
   created_by             Int?
   updated_by             Int?
@@ -82,6 +85,8 @@ model CallingCard {
   physical_cards         PhysicalCard[]
   social_links           SocialLink[]
   video_links            VideoLink[]
+  additional_contacts    AdditionalContact[]
+  additional_bios        AdditionalBio[]
 
   @@index([created_by], map: "calling_cards_created_by_fkey")
   @@index([deleted_by], map: "calling_cards_deleted_by_fkey")
@@ -140,6 +145,31 @@ model ExternalLink {
 
   @@index([calling_card_id], map: "external_links_calling_card_id_fkey")
   @@map("external_links")
+}
+
+model AdditionalContact {
+  id              Int           @id @default(autoincrement())
+  calling_card_id Int
+  label           String?       @db.VarChar(50)
+  value           String        @db.VarChar(255)
+  action_type     ContactAction @default(both)
+  display_order   Int           @default(0)
+  calling_card    CallingCard   @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+
+  @@index([calling_card_id], map: "additional_contacts_calling_card_id_fkey")
+  @@map("additional_contacts")
+}
+
+model AdditionalBio {
+  id              Int         @id @default(autoincrement())
+  calling_card_id Int
+  label           String?     @db.VarChar(50)
+  text            String      @db.Text
+  display_order   Int         @default(0)
+  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+
+  @@index([calling_card_id], map: "additional_bios_calling_card_id_fkey")
+  @@map("additional_bios")
 }
 
 model PhysicalCard {

@@ -76,13 +76,12 @@ export default function Sidebar({ isOpen, isCollapsed, onClose }: SidebarProps) 
             >
                 {/* Brand */}
                 <div className={`h-16 flex items-center border-b border-gray-100 transition-all duration-300 ${isCollapsed ? 'px-4 lg:justify-center' : 'px-6'}`}>
-                    <Link href="/admin" className="flex items-center gap-2.5 overflow-hidden">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center">
-                            <span className="text-white text-sm font-bold">JB</span>
-                        </div>
-                        <span className={`text-lg font-semibold tracking-tight text-gray-900 transition-opacity duration-300 ${isCollapsed ? 'lg:opacity-0 lg:hidden' : 'opacity-100'}`}>
-                            JustBump
-                        </span>
+                    <Link href="/admin" className="flex items-center justify-center py-2">
+                        <img
+                            src="/jblogo.png"
+                            alt="JustBump Logo"
+                            className="h-10 w-auto object-contain transition-all duration-300"
+                        />
                     </Link>
                 </div>
 

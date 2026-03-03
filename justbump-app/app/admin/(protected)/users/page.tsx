@@ -35,7 +35,6 @@ export default function UsersPage() {
     const [roleFilter, setRoleFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
 
-    // Modal states
     const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
     const [isLinkCardModalOpen, setIsLinkCardModalOpen] = useState(false);
     const [isUnlinkCardModalOpen, setIsUnlinkCardModalOpen] = useState(false);
@@ -54,7 +53,6 @@ export default function UsersPage() {
                 setUsers(fetchedUsers);
                 setLoading(false);
 
-                // Check for deep link to unlink card
                 const unlinkUserId = searchParams.get('unlink_user_id');
                 if (unlinkUserId) {
                     const userToUnlink = fetchedUsers.find(u => u.id === parseInt(unlinkUserId));
@@ -66,7 +64,6 @@ export default function UsersPage() {
                         });
                         setIsUnlinkCardModalOpen(true);
 
-                        // Clean up URL
                         const params = new URLSearchParams(searchParams.toString());
                         params.delete('unlink_user_id');
                         router.replace(`/admin/users${params.toString() ? `?${params.toString()}` : ''}`);
@@ -91,7 +88,6 @@ export default function UsersPage() {
     const totalPages = Math.ceil(filteredUsers.length / PAGE_SIZE);
     const paginatedUsers = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-    // Reset page when filters change
     useEffect(() => { setPage(1); }, [searchTerm, roleFilter, statusFilter]);
 
     const handleUserRegistered = (newUser: { id: number; email: string; role: string }) => {
@@ -124,7 +120,6 @@ export default function UsersPage() {
                 </button>
             </div>
 
-            {/* Filters */}
             <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                 <div className="relative flex-1 min-w-[240px]">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -443,7 +438,6 @@ function LinkCardModal({ user, onClose, onLinked }: { user: { id: number; email:
         const val = inputValue.trim();
         if (!val) return { mode: 'empty', uids: [] };
 
-        // Range support: e.g. 0022-0024
         const rangeMatch = val.match(/^(\d+)\s*-\s*(\d+)$/);
         if (rangeMatch) {
             const startNum = parseInt(rangeMatch[1], 10);
@@ -460,7 +454,6 @@ function LinkCardModal({ user, onClose, onLinked }: { user: { id: number; email:
             return { mode: 'batch', uids };
         }
 
-        // Single UID
         if (/^\d+$/.test(val)) {
             return { mode: 'single', uids: [val.padStart(4, '0')] };
         }
@@ -679,7 +672,6 @@ function UnlinkCardModal({ user, onClose, onUnlinked }: {
                     </div>
 
                     <div className="p-6 space-y-5">
-                        {/* Card Selection */}
                         <div>
                             <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">
                                 {user.cards.length === 1 ? 'Linked Card' : 'Select Card to Unlink'}
