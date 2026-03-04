@@ -16,7 +16,7 @@ export default function AdminDashboardLayout({ children }: { children: ReactNode
                 onClose={() => setIsSidebarOpen(false)}
                 onCollapseToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             />
-            <div className={`flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+            <div className={`flex flex-col min-h-screen transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${isSidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-64'}`}>
                 <Header
                     title="Dashboard"
                     onMenuClick={() => setIsSidebarOpen(true)}

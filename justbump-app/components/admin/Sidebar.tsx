@@ -65,41 +65,42 @@ export default function Sidebar({ isOpen, isCollapsed, onClose, onCollapseToggle
         <>
             {/* Mobile Backdrop */}
             <div
-                className={`fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
                 onClick={onClose}
             />
 
             {/* Sidebar */}
             <aside
-                className={`fixed left-0 top-0 h-full bg-white border-r border-gray-100 flex flex-col z-50 transition-all duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-                    } ${isCollapsed ? 'w-64 lg:w-20' : 'w-64'}`}
+                className={`fixed left-0 top-0 h-full bg-white border-r border-gray-100 flex flex-col z-50
+                    transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)]
+                    ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    ${isCollapsed ? 'w-64 lg:w-[72px]' : 'w-64'}`}
             >
                 {/* Brand */}
-                <div className={`h-16 flex items-center border-b border-gray-100 transition-all duration-300 relative ${isCollapsed ? 'px-4 lg:justify-center' : 'px-6'}`}>
-                    <Link href="/admin" className="flex items-center justify-center py-2">
+                <div className={`h-16 flex items-center border-b border-gray-100 transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] relative ${isCollapsed ? 'px-3 lg:justify-center' : 'px-6'}`}>
+                    <Link href="/admin" className="flex items-center justify-center py-2 overflow-hidden">
                         <img
                             src="/jblogo.png"
                             alt="JustBump Logo"
-                            className="h-10 w-auto object-contain transition-all duration-300"
+                            className={`object-contain transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'h-8 lg:h-7' : 'h-10'}`}
                         />
                     </Link>
 
                     {/* Desktop Collapse Toggle */}
                     <button
                         onClick={onCollapseToggle}
-                        className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white border border-gray-100 rounded-full items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-200 shadow-sm transition-all duration-300 z-50"
-                        style={{ transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        className={`hidden lg:flex absolute -right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-white border border-gray-200 rounded-full items-center justify-center text-gray-400 hover:text-brand-600 hover:border-brand-200 hover:bg-brand-50 shadow-sm hover:shadow-md transition-all duration-300 z-50 ${isCollapsed ? 'rotate-180' : 'rotate-0'}`}
                         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                     >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                         </svg>
                     </button>
                 </div>
 
                 {/* Nav */}
-                <nav className={`flex-1 py-4 space-y-1 overflow-y-auto transition-all duration-300 ${isCollapsed ? 'px-2 lg:px-4' : 'px-3'}`}>
+                <nav className={`flex-1 py-4 space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'px-2 lg:px-2' : 'px-3'}`}>
                     {navItems.map((item) => {
                         const isActive =
                             item.href === '/admin'
@@ -111,17 +112,53 @@ export default function Sidebar({ isOpen, isCollapsed, onClose, onCollapseToggle
                                 key={item.href}
                                 href={item.href}
                                 onClick={() => onClose()}
-                                className={`flex items-center rounded-lg text-sm font-medium transition-all duration-300 ${isCollapsed ? 'lg:justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
-                                    } ${isActive
-                                        ? 'bg-gray-900 text-white'
-                                        : 'text-gray-600 hover:bg-surface-100 hover:text-gray-900'
+                                className={`group relative flex items-center rounded-xl text-sm font-medium
+                                    transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)]
+                                    ${isCollapsed ? 'lg:justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'}
+                                    ${isActive
+                                        ? 'bg-gray-900 text-white shadow-sm'
+                                        : 'text-gray-500 hover:bg-surface-100 hover:text-gray-900'
                                     }`}
-                                title={isCollapsed ? item.label : ''}
                             >
-                                <div className="flex-shrink-0">{item.icon}</div>
-                                <span className={`transition-opacity duration-300 ${isCollapsed ? 'lg:opacity-0 lg:hidden' : 'opacity-100'}`}>
+                                {/* Active indicator bar */}
+                                {isActive && (
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-500 rounded-r-full transition-all duration-300" />
+                                )}
+
+                                {/* Icon */}
+                                <div className={`flex-shrink-0 transition-transform duration-200 ease-out ${!isActive ? 'group-hover:scale-110' : ''}`}>
+                                    {item.icon}
+                                </div>
+
+                                {/* Label — fade + shrink transition */}
+                                <span
+                                    className={`whitespace-nowrap transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden
+                                        ${isCollapsed
+                                            ? 'lg:max-w-0 lg:opacity-0 lg:ml-0 max-w-[160px] opacity-100'
+                                            : 'max-w-[160px] opacity-100 ml-0'
+                                        }`}
+                                >
                                     {item.label}
                                 </span>
+
+                                {/* Tooltip — only visible when sidebar is collapsed (desktop) */}
+                                <div className={`absolute left-full top-1/2 -translate-y-1/2 ml-3 pointer-events-none
+                                    transition-all duration-200 ease-out
+                                    opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0
+                                    ${isCollapsed ? 'hidden lg:block' : 'hidden'}`}
+                                >
+                                    <div className={`relative px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap shadow-lg
+                                        ${isActive ? 'bg-gray-900 text-white' : 'bg-gray-800 text-gray-100'}`}
+                                    >
+                                        {/* Arrow */}
+                                        <div className={`absolute right-full top-1/2 -translate-y-1/2 w-0 h-0
+                                            border-t-[5px] border-t-transparent
+                                            border-b-[5px] border-b-transparent
+                                            border-r-[5px] ${isActive ? 'border-r-gray-900' : 'border-r-gray-800'}`}
+                                        />
+                                        {item.label}
+                                    </div>
+                                </div>
                             </Link>
                         );
                     })}
@@ -129,12 +166,18 @@ export default function Sidebar({ isOpen, isCollapsed, onClose, onCollapseToggle
 
                 {/* Footer */}
                 <div className="p-4 border-t border-gray-100 text-center overflow-hidden">
-                    <p className={`text-xs text-gray-400 transition-opacity duration-300 ${isCollapsed ? 'lg:opacity-0 lg:hidden' : 'opacity-100'}`}>
+                    <p
+                        className={`text-xs text-gray-400 whitespace-nowrap transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)]
+                            ${isCollapsed ? 'lg:max-w-0 lg:opacity-0 max-w-[200px] opacity-100' : 'max-w-[200px] opacity-100'}`}
+                    >
                         Admin Panel v1.0
                     </p>
-                    {isCollapsed && (
-                        <div className="hidden lg:block text-[10px] font-bold text-gray-400">v1.0</div>
-                    )}
+                    <div
+                        className={`text-[10px] font-bold text-gray-400 transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)]
+                            ${isCollapsed ? 'hidden lg:block lg:opacity-100 lg:max-h-6 lg:mt-0' : 'hidden lg:hidden'}`}
+                    >
+                        v1.0
+                    </div>
                 </div>
             </aside>
         </>
