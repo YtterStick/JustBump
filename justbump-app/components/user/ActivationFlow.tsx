@@ -64,8 +64,8 @@ export default function ActivationFlow({ userEmail, slug, physicalCards = [], on
     };
 
     return (
-        <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-8 items-center">
                 {/* Visual Side — Flippable Black Card */}
                 <div className="relative group flex flex-col items-center gap-6">
                     <div className="absolute -inset-8 bg-gradient-to-tr from-brand-500/10 to-brand-600/5 rounded-[3rem] blur-3xl group-hover:blur-2xl transition-all duration-1000 opacity-60 pointer-events-none" />
@@ -95,8 +95,9 @@ export default function ActivationFlow({ userEmail, slug, physicalCards = [], on
                                 transition: 'transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1)',
                                 transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                                 position: 'relative',
-                                height: '200px',
+                                height: '220px',
                             }}
+                            className="h-[180px] sm:h-[220px]"
                         >
                             {/* ─── FRONT FACE ─── */}
                             <div
@@ -202,40 +203,39 @@ export default function ActivationFlow({ userEmail, slug, physicalCards = [], on
                     </div>
                 </div>
 
-                {/* Content Side */}
-                <div className="space-y-8">
-                    <div>
-                        <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-4">
+                <div className="space-y-6 sm:space-y-8">
+                    <div className="text-center md:text-left">
+                        <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight mb-4">
                             Activate your <span className="text-brand-600">Just Bump.</span>
                         </h1>
-                        <p className="text-gray-500 text-lg leading-relaxed">
+                        <p className="text-gray-500 text-base sm:text-lg leading-relaxed">
                             Link your Just Bump to your digital profile. You can activate and manage multiple Just Bump products under one account.
                         </p>
                     </div>
 
                     <div className="space-y-6">
                         <div className="flex flex-col gap-4">
-                            <div className="p-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+                            <div className="p-6 sm:p-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-3">
                                     <div className="w-1.5 h-1.5 rounded-full bg-brand-500" />
                                 </div>
                                 <h4 className="font-bold text-gray-900 mb-2">Connect Product</h4>
-                                <p className="text-xs text-gray-500 mb-6 leading-relaxed uppercase tracking-widest font-black opacity-40">Enter UID to Activate</p>
+                                <p className="text-[10px] text-gray-500 mb-6 leading-relaxed uppercase tracking-widest font-black opacity-40">Enter UID to Activate</p>
 
                                 <form onSubmit={handleActivate} className="space-y-4">
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
                                         <input
                                             type="text"
                                             value={uid}
                                             onChange={(e) => setUid(e.target.value)}
                                             placeholder="XXXX"
-                                            className="flex-1 px-5 py-4 rounded-2xl border border-gray-100 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 placeholder-gray-300 font-mono tracking-widest uppercase bg-gray-50/30"
+                                            className="w-full sm:flex-1 px-5 py-4 rounded-2xl border border-gray-100 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 placeholder-gray-300 font-mono tracking-widest uppercase bg-gray-50/30"
                                             maxLength={10}
                                         />
                                         <button
                                             type="submit"
                                             disabled={loading || !uid || success}
-                                            className="px-8 py-4 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-2xl transition-all active:scale-95 disabled:opacity-50 shadow-lg flex items-center gap-2"
+                                            className="w-full sm:w-auto px-8 py-4 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-2xl transition-all active:scale-95 disabled:opacity-50 shadow-lg flex items-center justify-center gap-2"
                                         >
                                             {loading ? (
                                                 <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -249,10 +249,10 @@ export default function ActivationFlow({ userEmail, slug, physicalCards = [], on
                                         </button>
                                     </div>
                                     {error && (
-                                        <p className="text-[11px] text-red-500 font-bold italic animate-in slide-in-from-left-1">{error}</p>
+                                        <p className="text-[11px] text-center sm:text-left text-red-500 font-bold italic animate-in slide-in-from-left-1">{error}</p>
                                     )}
                                     {success && (
-                                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 text-center sm:text-left">
                                             <p className="text-[11px] text-green-600 font-bold italic">Product activated! Linked to your profile. ✨</p>
                                         </div>
                                     )}

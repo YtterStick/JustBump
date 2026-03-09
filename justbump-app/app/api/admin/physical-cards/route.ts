@@ -3,6 +3,8 @@ import { prisma } from '../../../../lib/prisma';
 import { verifyAdminToken } from '../../../../lib/auth';
 import { logAdminAction } from '../../../../lib/logger';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
     try {
         const token = await verifyAdminTokenFromCookie(req);

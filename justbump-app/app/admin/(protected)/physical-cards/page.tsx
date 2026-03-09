@@ -287,10 +287,10 @@ export default function PhysicalCardsPage() {
                 </div>
             </div>
 
-            {/* Grid: Left = Register, Right = Filters + Table */}
+            {/* Grid: Left = Register, Right = Filters + Cards/Table */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* LEFT: Registration Form */}
-                <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow p-6 h-fit">
+                <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow p-4 sm:p-6 h-fit">
                     <div className="flex items-center gap-2 mb-5">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Register Cards</h3>
@@ -414,11 +414,11 @@ export default function PhysicalCardsPage() {
                     )}
                 </div>
 
-                {/* RIGHT: Filters + Table */}
+                {/* RIGHT: Filters + Cards/Table */}
                 <div className="lg:col-span-2 space-y-4">
                     {/* Filters */}
                     <div className="flex flex-wrap gap-3 items-end bg-white p-4 rounded-2xl border border-gray-200 shadow">
-                        <div className="flex-1 min-w-[200px]">
+                        <div className="flex-1 min-w-[200px] w-full">
                             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Search</label>
                             <div className="relative">
                                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -435,51 +435,55 @@ export default function PhysicalCardsPage() {
                                 />
                             </div>
                         </div>
-                        <div className="w-[120px]">
-                            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Type</label>
-                            <select
-                                value={typeFilter}
-                                onChange={(e) => setTypeFilter(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm outline-none bg-white focus:border-brand-500 transition-all"
-                            >
-                                <option value="all">All Types</option>
-                                {CARD_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                            </select>
-                        </div>
-                        <div className="w-[120px]">
-                            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Status</label>
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm outline-none bg-white focus:border-brand-500 transition-all"
-                            >
-                                <option value="all">All</option>
-                                <option value="unassigned">Unassigned</option>
-                                <option value="assigned">Assigned</option>
-                                <option value="active">Active</option>
-                                <option value="blocked">Blocked</option>
-                            </select>
+                        <div className="flex gap-3 w-full sm:w-auto sm:flex-nowrap">
+                            <div className="flex-1 sm:w-[120px]">
+                                <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Type</label>
+                                <select
+                                    value={typeFilter}
+                                    onChange={(e) => setTypeFilter(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm outline-none bg-white focus:border-brand-500 transition-all"
+                                >
+                                    <option value="all">All Types</option>
+                                    {CARD_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+                            <div className="flex-1 sm:w-[120px]">
+                                <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Status</label>
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm outline-none bg-white focus:border-brand-500 transition-all"
+                                >
+                                    <option value="all">All</option>
+                                    <option value="unassigned">Unassigned</option>
+                                    <option value="assigned">Assigned</option>
+                                    <option value="active">Active</option>
+                                    <option value="blocked">Blocked</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Data Table */}
+                    {/* Data Display */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow overflow-hidden">
                         {loading ? (
-                            <table className="w-full text-left">
-                                <thead className="border-b border-gray-100 bg-surface-50">
-                                    <tr>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">UID</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Type</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-center">Status</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-center">Created At</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Assigned To</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {[...Array(6)].map((_, i) => <SkeletonRow key={i} />)}
-                                </tbody>
-                            </table>
+                            <div className="hidden md:block">
+                                <table className="w-full text-left">
+                                    <thead className="border-b border-gray-100 bg-surface-50">
+                                        <tr>
+                                            <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">UID</th>
+                                            <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Type</th>
+                                            <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-center">Status</th>
+                                            <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-center">Created At</th>
+                                            <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Assigned To</th>
+                                            <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-50">
+                                        {[...Array(6)].map((_, i) => <SkeletonRow key={i} />)}
+                                    </tbody>
+                                </table>
+                            </div>
                         ) : filteredCards.length === 0 ? (
                             <div className="p-16 text-center">
                                 <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
@@ -491,78 +495,146 @@ export default function PhysicalCardsPage() {
                                 <p className="text-xs text-gray-400 mt-1">Try adjusting your filters or register new cards.</p>
                             </div>
                         ) : (
-                            <table className="w-full text-left">
-                                <thead className="border-b border-gray-100 bg-surface-50">
-                                    <tr>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">UID</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Type</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-center">Status</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-center">Created At</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Assigned To</th>
-                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
+                            <>
+                                {/* Table view for Desktop / Tablet */}
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead className="border-b border-gray-100 bg-surface-50">
+                                            <tr>
+                                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">UID</th>
+                                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Type</th>
+                                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-center">Status</th>
+                                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-center">Created At</th>
+                                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Assigned To</th>
+                                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-50">
+                                            {paginatedCards.map((card) => (
+                                                <tr key={card.card_id} className="hover:bg-surface-50/50 transition-colors duration-150 group">
+                                                    <td className="px-6 py-3.5">
+                                                        <code className="text-xs font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md tracking-wide">{card.card_uid}</code>
+                                                    </td>
+                                                    <td className="px-6 py-3.5 text-sm text-gray-600">
+                                                        <span className="flex items-center gap-1.5">
+                                                            {card.card_type === 'Card' && '🪪'}
+                                                            {card.card_type === 'Sticker' && '🏷️'}
+                                                            {card.card_type === 'Keychain' && '🔑'}
+                                                            {card.card_type === 'Other' && '📦'}
+                                                            {card.card_type}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-3.5 text-center">
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${card.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                                                            card.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
+                                                                card.status === 'blocked' ? 'bg-red-100 text-red-700' :
+                                                                    'bg-amber-100 text-amber-700'
+                                                            }`}>
+                                                            <span className={`w-1.5 h-1.5 rounded-full ${card.status === 'active' ? 'bg-emerald-500' :
+                                                                card.status === 'assigned' ? 'bg-blue-500' :
+                                                                    card.status === 'blocked' ? 'bg-red-500' :
+                                                                        'bg-amber-500'
+                                                                }`} />
+                                                            {card.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-3.5 text-center text-xs text-gray-500 font-mono">
+                                                        {new Date(card.created_at).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-3.5 text-sm text-gray-600">
+                                                        {card.calling_card?.full_name || <span className="text-gray-300 italic">Unassigned</span>}
+                                                    </td>
+                                                    <td className="px-6 py-3.5 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <button
+                                                                onClick={() => setSelectedCard(card)}
+                                                                className="p-1.5 text-gray-400 hover:text-brand-600 transition-colors duration-150 rounded-lg hover:bg-brand-50"
+                                                                title="Edit Card"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                                </svg>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setDeletingId(card.card_id)}
+                                                                className="p-1.5 text-gray-400 hover:text-red-600 transition-colors duration-150 rounded-lg hover:bg-red-50"
+                                                                title="Delete Card"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Card view for Mobile */}
+                                <div className="md:hidden divide-y divide-gray-100">
                                     {paginatedCards.map((card) => (
-                                        <tr key={card.card_id} className="hover:bg-surface-50/50 transition-colors duration-150 group">
-                                            <td className="px-6 py-3.5">
-                                                <code className="text-xs font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md tracking-wide">{card.card_uid}</code>
-                                            </td>
-                                            <td className="px-6 py-3.5 text-sm text-gray-600">
-                                                <span className="flex items-center gap-1.5">
-                                                    {card.card_type === 'Card' && '🪪'}
-                                                    {card.card_type === 'Sticker' && '🏷️'}
-                                                    {card.card_type === 'Keychain' && '🔑'}
-                                                    {card.card_type === 'Other' && '📦'}
-                                                    {card.card_type}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-3.5 text-center">
-                                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${card.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                                        <div key={card.card_id} className="p-4 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <code className="text-xs font-semibold text-gray-900 bg-gray-100 px-2 py-1 rounded-md tracking-wide">{card.card_uid}</code>
+                                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide ${card.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
                                                     card.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
                                                         card.status === 'blocked' ? 'bg-red-100 text-red-700' :
                                                             'bg-amber-100 text-amber-700'
                                                     }`}>
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${card.status === 'active' ? 'bg-emerald-500' :
+                                                    <span className={`w-1 h-1 rounded-full ${card.status === 'active' ? 'bg-emerald-500' :
                                                         card.status === 'assigned' ? 'bg-blue-500' :
                                                             card.status === 'blocked' ? 'bg-red-500' :
                                                                 'bg-amber-500'
                                                         }`} />
                                                     {card.status}
                                                 </span>
-                                            </td>
-                                            <td className="px-6 py-3.5 text-center text-xs text-gray-500 font-mono">
-                                                {new Date(card.created_at).toLocaleDateString()}
-                                            </td>
-                                            <td className="px-6 py-3.5 text-sm text-gray-600">
-                                                {card.calling_card?.full_name || <span className="text-gray-300 italic">Unassigned</span>}
-                                            </td>
-                                            <td className="px-6 py-3.5 text-right">
-                                                <div className="flex items-center justify-end gap-2">
+                                            </div>
+                                            <div className="flex items-center justify-between text-xs text-gray-600">
+                                                <span className="flex items-center gap-1.5 font-medium">
+                                                    {card.card_type === 'Card' && '🪪'}
+                                                    {card.card_type === 'Sticker' && '🏷️'}
+                                                    {card.card_type === 'Keychain' && '🔑'}
+                                                    {card.card_type === 'Other' && '📦'}
+                                                    {card.card_type}
+                                                </span>
+                                                <span className="text-gray-400 font-mono">{new Date(card.created_at).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-gray-500">
+                                                    {card.calling_card?.full_name ? (
+                                                        <span className="flex items-center gap-1">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                                                            {card.calling_card.full_name}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-gray-300 italic">Unassigned</span>
+                                                    )}
+                                                </span>
+                                                <div className="flex items-center gap-3">
                                                     <button
                                                         onClick={() => setSelectedCard(card)}
-                                                        className="p-1.5 text-gray-400 hover:text-brand-600 transition-colors duration-150 rounded-lg hover:bg-brand-50"
-                                                        title="Edit Card"
+                                                        className="p-2 text-gray-400 hover:text-brand-600 bg-gray-50 rounded-lg"
                                                     >
-                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                                                         </svg>
                                                     </button>
                                                     <button
                                                         onClick={() => setDeletingId(card.card_id)}
-                                                        className="p-1.5 text-gray-400 hover:text-red-600 transition-colors duration-150 rounded-lg hover:bg-red-50"
-                                                        title="Delete Card"
+                                                        className="p-2 text-gray-400 hover:text-red-600 bg-red-50/50 rounded-lg"
                                                     >
-                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                         </svg>
                                                     </button>
                                                 </div>
-                                            </td>
-                                        </tr>
+                                            </div>
+                                        </div>
                                     ))}
-                                </tbody>
-                            </table>
+                                </div>
+                            </>
                         )}
                     </div>
 
@@ -663,7 +735,7 @@ function EditSlideOver({ card, onClose, onSave, loading, error }: {
                 className={`fixed inset-0 bg-black/30 z-[60] transition-opacity duration-200 pointer-events-auto ${isClosing ? 'fade-out' : 'fade-in'}`}
                 onClick={handleClose}
             />
-            <div className={`fixed inset-y-0 right-0 z-[70] w-full max-w-sm bg-white shadow-2xl border-l border-gray-100 flex flex-col slide-in-right pointer-events-auto ${isClosing ? 'slide-out-right' : ''}`}>
+            <div className={`fixed inset-y-0 right-0 z-[70] w-full sm:max-w-sm bg-white shadow-2xl border-l border-gray-100 flex flex-col slide-in-right pointer-events-auto ${isClosing ? 'slide-out-right' : ''}`}>
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <div>
                         <h3 className="text-base font-semibold text-gray-900">Edit Card</h3>

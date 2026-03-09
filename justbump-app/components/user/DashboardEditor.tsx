@@ -39,8 +39,8 @@ export default function DashboardEditor() {
     if (!card) return null;
 
     return (
-        <div className="max-w-6xl mx-auto py-12 px-6">
-            <div className="flex flex-col lg:flex-row gap-12">
+        <div className="max-w-6xl mx-auto py-8 sm:py-12 px-4 sm:px-6">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
                 {/* Fixed Preview Side (Desktop) */}
                 <PreviewCard card={card} />
 
@@ -56,20 +56,20 @@ export default function DashboardEditor() {
                     <SaveBar isDirty={isDirty} saving={saving} message={message} />
 
                     {/* Tab Navigation */}
-                    <div className="flex p-1.5 bg-gray-100 rounded-2xl w-fit gap-1 shadow-inner overflow-x-auto max-w-full">
+                    <div className="flex p-1.5 bg-gray-100 rounded-2xl w-full sm:w-fit gap-1 shadow-inner overflow-x-auto custom-scrollbar no-scrollbar-mobile">
                         {(['profile', 'contacts', 'content', 'theme', 'products'] as const).map(tab => (
                             <button
                                 key={tab}
                                 type="button"
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === tab ? 'bg-white text-brand-600 shadow-sm scale-105' : 'text-gray-400 hover:text-gray-600'}`}
+                                className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all duration-300 min-w-fit ${activeTab === tab ? 'bg-white text-brand-600 shadow-sm scale-105' : 'text-gray-400 hover:text-gray-600'}`}
                             >
                                 {tab}
                             </button>
                         ))}
                     </div>
 
-                    <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm min-h-[500px] p-10">
+                    <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 shadow-sm min-h-[500px] p-5 sm:p-10">
                         {activeTab === 'profile' && (
                             <ProfileTab 
                                 card={card} 

@@ -6,7 +6,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 if (!globalForPrisma.prisma) {
-    console.log('--- Initializing Prisma Client Singleton ---');
+// console.log('--- Initializing Prisma Client Singleton ---');
     const poolConfig = {
         host: process.env.DB_HOST || 'localhost',
         port: Number(process.env.DB_PORT || 3306),
@@ -15,12 +15,12 @@ if (!globalForPrisma.prisma) {
         database: process.env.DB_NAME || 'jbdb',
     };
 
-    console.log('Pool Config [DEBUG]:', { ...poolConfig, password: poolConfig.password ? 'HIDDEN(' + poolConfig.password.length + ')' : 'EMPTY' });
+    // console.log('Pool Config [DEBUG]:', { ...poolConfig, password: poolConfig.password ? 'HIDDEN(' + poolConfig.password.length + ')' : 'EMPTY' });
 
     try {
         const adapter = new PrismaMariaDb(poolConfig);
         globalForPrisma.prisma = new PrismaClient({ adapter });
-        console.log('Prisma Client construction successful.');
+        // console.log('Prisma Client construction successful.');
     } catch (err) {
         console.error('FAILED to initialize Prisma Client:', err);
     }

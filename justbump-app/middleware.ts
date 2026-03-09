@@ -22,19 +22,26 @@ export async function middleware(request: NextRequest) {
     }
 
     if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+        const isPrefetch = request.headers.get('x-middleware-prefetch') === '1' || request.headers.get('purpose') === 'prefetch';
         const token = request.cookies.get('token')?.value;
-        console.log(`[Middleware] Admin route detected. Token present: ${!!token}`);
+
+        if (!isPrefetch) {
+            console.log(`[Middleware] Admin route detected. Token present: ${!!token}`);
+        }
 
         if (!token) {
-            console.log('[Middleware] No token found, redirecting to /admin/login');
+            if (!isPrefetch) console.log('[Middleware] No token found, redirecting to /admin/login');
             return NextResponse.redirect(new URL('/admin/login', request.url));
         }
 
         const decoded = await verifyAdminToken(token);
-        console.log(`[Middleware] Token verification result: ${decoded ? 'SUCCESS' : 'FAILED'}`);
+        
+        if (!isPrefetch) {
+            console.log(`[Middleware] Token verification result: ${decoded ? 'SUCCESS' : 'FAILED'}`);
+        }
 
         if (!decoded) {
-            console.log('[Middleware] Invalid token, clearing cookie and redirecting');
+            if (!isPrefetch) console.log('[Middleware] Invalid token, clearing cookie and redirecting');
             const response = NextResponse.redirect(new URL('/admin/login', request.url));
             response.cookies.set('token', '', { maxAge: 0 });
             return response;

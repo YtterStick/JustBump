@@ -31,15 +31,11 @@ export async function verifyToken(token: string): Promise<DecodedToken | null> {
 
 
 export async function verifyAdminToken(token: string): Promise<DecodedToken | null> {
-  console.log('[Auth] Verifying admin token...');
   const decoded = await verifyToken(token);
   if (!decoded) {
-    console.log('[Auth] Decoded token is null');
     return null;
   }
-  console.log('[Auth] Decoded role:', decoded.role);
   if (decoded.role !== 'Admin') {
-    console.log('[Auth] Role mismatch: expected Admin, got', decoded.role);
     return null;
   }
   return decoded;

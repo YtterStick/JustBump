@@ -1,6 +1,5 @@
-'use client';
-
 import { AsYouType, CountryCode, getCountryCallingCode } from 'libphonenumber-js';
+import { inter, roboto, outfit, playfair } from '../../../app/fonts';
 
 const COUNTRIES = [
     { code: 'PH', name: 'Philippines' },
@@ -72,7 +71,7 @@ export default function PreviewCard({ card }: { card: any }) {
     return (
         <div className="lg:w-80 space-y-6 lg:sticky lg:top-8 h-fit">
             <div
-                className="rounded-[2.5rem] text-center shadow-2xl relative overflow-hidden group border border-white/5"
+                className={`rounded-[2.5rem] text-center shadow-2xl relative overflow-hidden group border border-white/5 ${inter.variable} ${roboto.variable} ${outfit.variable} ${playfair.variable}`}
                 style={{
                     backgroundColor: card.theme_background_color || '#F9FAFB',
                     fontFamily: card.theme_font === 'inter' ? 'var(--font-inter)' :

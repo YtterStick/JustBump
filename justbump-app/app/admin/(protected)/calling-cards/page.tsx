@@ -349,24 +349,26 @@ export default function CallingCardsPage() {
                 </div>
             </div>
 
-            {/* Compressed Table */}
+            {/* Data Display */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow overflow-hidden">
                 {loading ? (
-                    <table className="w-full text-left">
-                        <thead className="border-b border-gray-100 bg-surface-50">
-                            <tr>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">ID</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Email</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Profile Name</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Slug</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Company</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-right">Details</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {[...Array(6)].map((_, i) => <SkeletonRow key={i} />)}
-                        </tbody>
-                    </table>
+                    <div className="hidden md:block">
+                        <table className="w-full text-left">
+                            <thead className="border-b border-gray-100 bg-surface-50">
+                                <tr>
+                                    <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">ID</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Profile Name</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Slug</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Company</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-right">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {[...Array(6)].map((_, i) => <SkeletonRow key={i} />)}
+                            </tbody>
+                        </table>
+                    </div>
                 ) : cards.length === 0 ? (
                     <div className="p-16 text-center">
                         <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
@@ -378,51 +380,89 @@ export default function CallingCardsPage() {
                         <p className="text-xs text-gray-400 mt-1">Try adjusting your search term.</p>
                     </div>
                 ) : (
-                    <table className="w-full text-left">
-                        <thead className="border-b border-gray-100 bg-surface-50">
-                            <tr>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">ID</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Email</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Profile Name</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Slug</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Company</th>
-                                <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-right">Details</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
+                    <>
+                        {/* Table view for Desktop / Tablet */}
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="border-b border-gray-100 bg-surface-50">
+                                    <tr>
+                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">ID</th>
+                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Profile Name</th>
+                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Slug</th>
+                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Company</th>
+                                        <th className="px-6 py-3.5 text-[11px] font-medium text-gray-400 uppercase tracking-wider text-right">Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {cards.map(card => (
+                                        <tr
+                                            key={card.id}
+                                            className="hover:bg-surface-50/50 transition-colors duration-150 cursor-pointer group"
+                                            onClick={() => setSelectedCard(card)}
+                                        >
+                                            <td className="px-6 py-3.5 text-xs text-gray-400 font-mono">#{card.id}</td>
+                                            <td className="px-6 py-3.5 text-sm text-gray-900 font-medium">{card.user.email}</td>
+                                            <td className="px-6 py-3.5 text-sm text-gray-700">{card.full_name}</td>
+                                            <td className="px-6 py-3.5">
+                                                <code className="text-xs text-brand-600 font-semibold bg-brand-50 px-1.5 py-0.5 rounded-md">
+                                                    {card.slug}
+                                                </code>
+                                            </td>
+                                            <td className="px-6 py-3.5 text-sm text-gray-500">{card.company || <span className="text-gray-300">—</span>}</td>
+                                            <td className="px-6 py-3.5 text-right">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedCard(card);
+                                                    }}
+                                                    className="p-1.5 text-gray-400 hover:text-brand-600 transition-colors duration-150 rounded-lg hover:bg-brand-50"
+                                                    title="View details"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Card view for Mobile */}
+                        <div className="md:hidden divide-y divide-gray-100">
                             {cards.map(card => (
-                                <tr
+                                <div
                                     key={card.id}
-                                    className="hover:bg-surface-50/50 transition-colors duration-150 cursor-pointer group"
+                                    className="p-4 space-y-3 active:bg-gray-50 transition-colors"
                                     onClick={() => setSelectedCard(card)}
                                 >
-                                    <td className="px-6 py-3.5 text-xs text-gray-400 font-mono">#{card.id}</td>
-                                    <td className="px-6 py-3.5 text-sm text-gray-900 font-medium">{card.user.email}</td>
-                                    <td className="px-6 py-3.5 text-sm text-gray-700">{card.full_name}</td>
-                                    <td className="px-6 py-3.5">
-                                        <code className="text-xs text-brand-600 font-semibold bg-brand-50 px-1.5 py-0.5 rounded-md">
-                                            {card.slug}
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-400 font-mono">#{card.id}</span>
+                                        <code className="text-[10px] text-brand-600 font-semibold bg-brand-50 px-2 py-0.5 rounded-md tracking-wide">
+                                            /{card.slug}
                                         </code>
-                                    </td>
-                                    <td className="px-6 py-3.5 text-sm text-gray-500">{card.company || <span className="text-gray-300">—</span>}</td>
-                                    <td className="px-6 py-3.5 text-right">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedCard(card);
-                                            }}
-                                            className="p-1.5 text-gray-400 hover:text-brand-600 transition-colors duration-150 rounded-lg hover:bg-brand-50"
-                                            title="View details"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="text-sm font-bold text-gray-900">{card.full_name}</h4>
+                                        <p className="text-xs text-gray-500 truncate">{card.user.email}</p>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+                                            {card.company || 'No Company'}
+                                        </span>
+                                        <div className="flex items-center gap-1.5 text-brand-600 text-[10px] font-bold">
+                                            View Details
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                             </svg>
-                                        </button>
-                                    </td>
-                                </tr>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
+                        </div>
+                    </>
                 )}
             </div>
 

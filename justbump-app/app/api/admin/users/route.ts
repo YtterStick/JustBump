@@ -5,6 +5,8 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { logAdminAction } from '../../../../lib/logger';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
     try {
         const cookieHeader = req.headers.get('cookie') || '';

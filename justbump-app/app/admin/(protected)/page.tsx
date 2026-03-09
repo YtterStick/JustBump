@@ -108,9 +108,24 @@ export default function AdminDashboard() {
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-32 bg-gray-100 rounded-2xl border border-gray-200 shadow-sm animate-pulse"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[
+                        { label: 'Total Users', icon: 'users', color: 'blue' },
+                        { label: 'Active Profiles', icon: 'profile', color: 'purple' },
+                        { label: 'Total Cards', icon: 'card', color: 'green' },
+                        { label: 'Unassigned Cards', icon: 'inventory', color: 'yellow' },
+                    ].map((stat, i) => (
+                        <div key={i} className="bg-white p-6 rounded-2xl border border-gray-200 shadow animate-pulse">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className={`p-2 rounded-xl ${colorMap[stat.color]}`}>
+                                    {iconMap[stat.icon]}
+                                </div>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-500">{stat.label}</h3>
+                                <div className="h-8 bg-gray-100 rounded w-16 mt-2"></div>
+                            </div>
+                        </div>
                     ))}
                 </div>
             ) : (
