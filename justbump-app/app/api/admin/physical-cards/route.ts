@@ -7,11 +7,26 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     try {
+        console.log('[API Physical Cards] GET Request started');
         const token = await verifyAdminTokenFromCookie(req);
+        console.log('[API Physical Cards] Token verified:', !!token);
         if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+        const url = new URL(req.url);
+        const statusParam = url.searchParams.get('status');
+
+        console.log('[API Physical Cards] Fetching cards from DB...');
+        const whereClause: any = { deleted_at: null };
+        if (statusParam) {
+            const allowedStatuses = new Set(['unassigned', 'assigned', 'active', 'blocked']);
+            if (!allowedStatuses.has(statusParam)) {
+                return NextResponse.json({ error: 'Invalid status parameter' }, { status: 400 });
+            }
+            whereClause.status = statusParam;
+        }
+
         const cards = await prisma.physicalCard.findMany({
-            where: { deleted_at: null },
+            where: whereClause,
             include: {
                 calling_card: {
                     include: {
@@ -27,8 +42,11 @@ export async function GET(req: Request) {
             orderBy: { created_at: 'asc' },
         });
 
+        console.log('[API Physical Cards] Fetch successful, cards found:', cards.length);
         return NextResponse.json(cards);
     } catch (error: any) {
+        console.error('[API Physical Cards] GET Error:', error.message);
+        if (error.stack) console.error(error.stack);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

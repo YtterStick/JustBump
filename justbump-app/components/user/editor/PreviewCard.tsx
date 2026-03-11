@@ -53,14 +53,11 @@ const getCountryFlag = (phoneNumber: string, className = "w-4 h-3 object-cover r
 };
 
 const getActionIcons = (actionType: string) => {
-    const isBoth = actionType === 'both';
-    const isCall = actionType === 'call' || isBoth;
-    const isMessage = actionType === 'message' || isBoth;
-
     return (
         <div className="flex gap-1.5 opacity-60">
-            {isCall && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>}
-            {isMessage && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>}
+            {actionType === 'both' && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>}
+            {actionType === 'call' && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>}
+            {actionType === 'message' && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>}
         </div>
     );
 };
@@ -135,18 +132,11 @@ export default function PreviewCard({ card }: { card: any }) {
                     </div>
 
                     <div className="space-y-3 pt-4 border-t border-white/10">
-                        {card.contact_value && (
-                            <div className="flex items-center justify-center gap-2.5 text-white/80">
-                                <span className="opacity-80 flex items-center">{getCountryFlag(card.contact_value, "w-4 h-3 object-cover rounded-sm")}</span>
-                                <span className="text-[10px] font-mono font-bold tracking-tight">{card.contact_value}</span>
-                                {getActionIcons('both')}
-                            </div>
-                        )}
-                        {card.additional_contacts.slice(0, 3).map((c: any, i: number) => (
-                            <div key={i} className="flex items-center justify-center gap-2.5 text-white/50">
+                        {(card.additional_contacts || []).map((c: any, i: number) => (
+                            <div key={i} className="flex items-center justify-center gap-2.5" style={{ color: i === 0 ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.5)' }}>
                                 <span className="opacity-80 flex items-center">{getCountryFlag(c.value, "w-4 h-3 object-cover rounded-sm")}</span>
-                                <span className="text-[9px] font-mono font-bold tracking-tight">{c.value}</span>
-                                {getActionIcons(c.action_type)}
+                                <span className={`font-mono font-bold tracking-tight ${i === 0 ? 'text-[10px]' : 'text-[9px]'}`}>{c.value}</span>
+                                {getActionIcons(c.action_type || 'both')}
                             </div>
                         ))}
                     </div>
@@ -171,9 +161,9 @@ export default function PreviewCard({ card }: { card: any }) {
                         </div>
                     )}
 
-                    {card.additional_bios?.length > 0 && (
+                    {card.bios?.length > 0 && (
                         <div className="mt-4 space-y-3">
-                            {card.additional_bios.map((b: any, i: number) => (
+                            {card.bios.map((b: any, i: number) => (
                                 <div key={i} className="text-center">
                                     {b.label && <h5 className="text-[8px] font-black uppercase tracking-[0.2em] text-white/30 mb-1">{b.label}</h5>}
                                     <p className="text-[9px] text-white/70 leading-relaxed font-medium px-4">{b.text}</p>

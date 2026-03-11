@@ -153,14 +153,39 @@ export default function LogsPage() {
 
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 {loading && logs.length === 0 ? (
-                    <div className="p-12 text-center">
-                        <div className="flex flex-col items-center gap-3">
-                            <svg className="w-8 h-8 text-gray-200 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                            </svg>
-                            <p className="text-sm font-medium text-gray-400">Loading activity history...</p>
-                        </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="bg-surface-50 border-b border-gray-100">
+                                <tr>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Timestamp</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Admin</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Action</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Target</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Details</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                                    <tr key={i} className="animate-pulse">
+                                        <td className="px-6 py-5"><div className="h-4 bg-gray-100 rounded-lg w-32"></div></td>
+                                        <td className="px-6 py-5">
+                                            <div className="h-4 bg-gray-100 rounded-lg w-40 mb-2"></div>
+                                            <div className="h-3 bg-gray-50 rounded-lg w-20"></div>
+                                        </td>
+                                        <td className="px-6 py-5"><div className="h-6 bg-gray-100 rounded-md w-24"></div></td>
+                                        <td className="px-6 py-5"><div className="h-4 bg-gray-100 rounded-lg w-16"></div></td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex gap-2">
+                                                <div className="h-7 bg-gray-100 rounded-lg w-24"></div>
+                                                <div className="h-7 bg-gray-100 rounded-lg w-24"></div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5"><div className="h-4 bg-gray-100 rounded-lg w-28"></div></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 ) : logs.length === 0 ? (
                     <div className="p-16 text-center">

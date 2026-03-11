@@ -131,29 +131,29 @@ export default function ProfileTab({
                         </div>
                         <button
                             type="button"
-                            onClick={() => addItem('additional_bios', { label: 'Quick Note', text: '' })}
+                            onClick={() => addItem('bios', { label: 'Quick Note', text: '' })}
                             className="text-[10px] font-black text-brand-600 hover:text-brand-700 uppercase tracking-widest"
                         >
                             + Add Info Block
                         </button>
                     </div>
                     <div className="space-y-4">
-                        {card.additional_bios.map((b: any, i: number) => (
+                        {card.bios.map((b: any, i: number) => (
                             <div key={i} className="p-6 rounded-2xl bg-gray-50 border border-gray-100 space-y-4 relative group">
-                                <button type="button" onClick={() => removeItem('additional_bios', i)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button type="button" onClick={() => removeItem('bios', i)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
                                 <div className="space-y-3">
                                     <input
                                         type="text"
                                         value={b.label || ''}
-                                        onChange={e => updateItem('additional_bios', i, 'label', e.target.value)}
+                                        onChange={e => updateItem('bios', i, 'label', e.target.value)}
                                         placeholder="Title (e.g. My Mission)"
                                         className="w-full px-4 py-2 rounded-xl border border-gray-100 text-[10px] font-black uppercase tracking-widest bg-white outline-none focus:border-brand-500 transition-colors"
                                     />
                                     <textarea
                                         value={b.text || ''}
-                                        onChange={e => updateItem('additional_bios', i, 'text', e.target.value)}
+                                        onChange={e => updateItem('bios', i, 'text', e.target.value)}
                                         placeholder="Write something..."
                                         rows={3}
                                         className="w-full px-4 py-3 rounded-xl border border-gray-100 text-xs bg-white outline-none resize-none focus:border-brand-500 transition-colors"

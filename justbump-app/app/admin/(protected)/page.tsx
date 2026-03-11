@@ -44,7 +44,7 @@ function getActionDetail(log: ActivityLog) {
     const parts: string[] = [];
     if (log.target_type) parts.push(log.target_type);
     if (log.target_id) parts.push(`#${log.target_id}`);
-    parts.push(`by ${log.admin.email}`);
+    parts.push(`by ${log.admin?.email || 'Unknown'}`);
     return parts.join(' · ');
 }
 

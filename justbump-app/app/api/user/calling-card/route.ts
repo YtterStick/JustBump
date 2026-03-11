@@ -16,8 +16,6 @@ export async function GET(req: Request) {
                 bank_details: true,
                 video_links: true,
                 external_links: true,
-                additional_contacts: true,
-                additional_bios: true,
                 physical_cards: {
                     where: { status: { in: ['active', 'assigned'] }, deleted_at: null }
                 }
@@ -33,7 +31,20 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Activation required' }, { status: 403 });
         }
 
-        return NextResponse.json(card);
+        // Build unified contacts array
+        let additionalContacts = (card as any).contacts || [];
+        // Migrate legacy contact_value if contacts array is empty
+        if (additionalContacts.length === 0 && card.contact_value) {
+            additionalContacts = [{ value: card.contact_value, action_type: 'both' }];
+        }
+
+        const response = {
+            ...card,
+            additional_contacts: additionalContacts,
+            bios: (card as any).bios || [],
+        };
+
+        return NextResponse.json(response);
     } catch (err: any) {
         console.error('GET Error details:', err);
         return NextResponse.json({ error: 'Server error', message: err.message }, { status: 500 });
@@ -50,10 +61,10 @@ export async function PUT(req: Request) {
         console.log('PUT Body:', JSON.stringify(body, null, 2));
         const {
             full_name, job_title, company, address, profile_image_url, cover_image_url,
-            bio_label, bio_text, contact_value,
+            bio_label, bio_text,
             theme_primary_color, theme_secondary_color, theme_text_color, theme_background_color,
-            theme_layout, theme_font,
-            social_links, video_links, additional_contacts, additional_bios, external_links, bank_details
+            theme_layout, theme_font, bios, additional_contacts,
+            social_links, video_links, external_links, bank_details
         } = body;
 
         const userId = Number(token.userId);
@@ -78,9 +89,11 @@ export async function PUT(req: Request) {
                     where: { user_id: userId },
                     data: {
                         full_name, job_title, company, address, profile_image_url, cover_image_url,
-                        bio_label, bio_text, contact_value,
+                        bio_label, bio_text,
+                        contact_value: additional_contacts?.[0]?.value || null,
                         theme_primary_color, theme_secondary_color, theme_text_color, theme_background_color,
-                        theme_layout, theme_font
+                        theme_layout, theme_font, bios,
+                        contacts: additional_contacts ?? undefined
                     }
                 });
 
@@ -137,38 +150,7 @@ export async function PUT(req: Request) {
                     }
                 }
 
-                // Additional Contacts
-                if (additional_contacts) {
-                    console.log('SYNC CONTACTS:', additional_contacts.length);
-                    await tx.additionalContact.deleteMany({ where: { calling_card_id: card.id } });
-                    if (additional_contacts.length > 0) {
-                        await tx.additionalContact.createMany({
-                            data: additional_contacts.map((contact: any) => ({
-                                calling_card_id: card.id,
-                                label: contact.label || null,
-                                value: contact.value || '',
-                                action_type: contact.action_type || 'both',
-                                display_order: contact.display_order || 0
-                            }))
-                        });
-                    }
-                }
 
-                // Additional Bios
-                if (additional_bios) {
-                    console.log('SYNC BIOS:', additional_bios.length);
-                    await tx.additionalBio.deleteMany({ where: { calling_card_id: card.id } });
-                    if (additional_bios.length > 0) {
-                        await tx.additionalBio.createMany({
-                            data: additional_bios.map((bio: any) => ({
-                                calling_card_id: card.id,
-                                label: bio.label || null,
-                                text: bio.text || '',
-                                display_order: bio.display_order || 0
-                            }))
-                        });
-                    }
-                }
 
                 // External Links
                 if (external_links) {
@@ -191,8 +173,6 @@ export async function PUT(req: Request) {
                     include: {
                         social_links: true,
                         video_links: true,
-                        additional_contacts: true,
-                        additional_bios: true,
                         external_links: true,
                         bank_details: true,
                         physical_cards: true
@@ -204,7 +184,14 @@ export async function PUT(req: Request) {
             }
         });
 
-        return NextResponse.json(updated);
+        // Map JSON fields back to frontend-expected names
+        const response = {
+            ...updated,
+            additional_contacts: (updated as any)?.contacts || [],
+            bios: (updated as any)?.bios || [],
+        };
+
+        return NextResponse.json(response);
     } catch (err: any) {
         console.error('Update error details [500]:', err);
         return NextResponse.json({

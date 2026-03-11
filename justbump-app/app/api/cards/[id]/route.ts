@@ -29,7 +29,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     if (owner[0].user_id !== token.userId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await req.json();
-    const allowed = ['full_name','job_title','company','headline','address','profile_image_url','slug','is_active'];
+    const allowed = ['full_name','job_title','company','headline','address','profile_image_url','slug','is_active', 'bios'];
     const sets: string[] = [];
     const paramsArr: any[] = [];
 

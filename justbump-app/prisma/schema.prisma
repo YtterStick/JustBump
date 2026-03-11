@@ -8,89 +8,92 @@ datasource db {
 
 model User {
   id                    Int            @id @default(autoincrement())
-  email                 String         @unique @db.VarChar(255)
+  email                 String         @unique(map: "email") @db.VarChar(255)
   phone_number          String?        @db.VarChar(20)
   password_hash         String         @db.VarChar(255)
-  role                  UserRole       @default(User)
-  email_verified        Boolean        @default(false)
-  phone_number_verified Boolean        @default(false)
-  failed_attempts       Int            @default(0)
+  role                  UserRole?      @default(User)
+  email_verified        Boolean?       @default(false)
+  phone_number_verified Boolean?       @default(false)
+  failed_attempts       Int?           @default(0)
   lockout_until         DateTime?      @db.Timestamp(0)
   last_login            DateTime?      @db.Timestamp(0)
-  is_active             Boolean        @default(true)
-  created_at            DateTime       @default(now()) @db.Timestamp(0)
+  is_active             Boolean?       @default(true)
+  created_at            DateTime?      @default(now()) @db.Timestamp(0)
   created_by            Int?
-  updated_at            DateTime       @updatedAt @db.Timestamp(0)
+  updated_at            DateTime?      @default(now()) @updatedAt @db.Timestamp(0)
   updated_by            Int?
   deleted_at            DateTime?      @db.Timestamp(0)
   deleted_by            Int?
   admin_logs            AdminLog[]     @relation("AdminLogBy")
+  calling_card          CallingCard?
   created_cards         CallingCard[]  @relation("CardCreatedBy")
   deleted_cards         CallingCard[]  @relation("CardDeletedBy")
   updated_cards         CallingCard[]  @relation("CardUpdatedBy")
-  calling_card          CallingCard?
   created_physical      PhysicalCard[] @relation("PhysicalCreatedBy")
   deleted_physical      PhysicalCard[] @relation("PhysicalDeletedBy")
   updated_physical      PhysicalCard[] @relation("PhysicalUpdatedBy")
-  creator               User?          @relation("CreatedByUser", fields: [created_by], references: [id])
+  creator               User?          @relation("CreatedByUser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_users_created_by")
   createdUsers          User[]         @relation("CreatedByUser")
-  deleter               User?          @relation("DeletedByUser", fields: [deleted_by], references: [id])
+  deleter               User?          @relation("DeletedByUser", fields: [deleted_by], references: [id], onUpdate: NoAction, map: "fk_users_deleted_by")
   deletedUsers          User[]         @relation("DeletedByUser")
-  updater               User?          @relation("UpdatedByUser", fields: [updated_by], references: [id])
+  updater               User?          @relation("UpdatedByUser", fields: [updated_by], references: [id], onUpdate: NoAction, map: "fk_users_updated_by")
   updatedUsers          User[]         @relation("UpdatedByUser")
 
   @@index([email], map: "idx_user_email")
   @@index([phone_number], map: "idx_user_phone")
-  @@index([created_by], map: "users_created_by_fkey")
-  @@index([deleted_by], map: "users_deleted_by_fkey")
-  @@index([updated_by], map: "users_updated_by_fkey")
+  @@index([created_by], map: "fk_users_created_by")
+  @@index([deleted_by], map: "fk_users_deleted_by")
+  @@index([updated_by], map: "fk_users_updated_by")
   @@map("users")
 }
 
 model CallingCard {
-  id                     Int            @id @default(autoincrement())
-  user_id                Int            @unique(map: "uq_calling_cards_user")
-  full_name              String         @db.VarChar(100)
-  job_title              String?        @db.VarChar(100)
-  company                String?        @db.VarChar(100)
-  address                String?        @db.Text
-  profile_image_url      String?        @db.VarChar(512)
-  cover_image_url        String?        @db.VarChar(512)
-  bio_label              String?        @db.VarChar(50)
-  bio_text               String?        @db.Text
-  contact_value          String?        @db.VarChar(255)
-  contact_action_type    ContactAction  @default(both)
-  slug                   String         @unique @db.VarChar(50)
-  sharing_id             String         @unique @db.Char(36)
-  theme_primary_color    String         @default("#000000") @db.VarChar(7)
-  theme_secondary_color  String         @default("#FFFFFF") @db.VarChar(7)
-  theme_text_color       String         @default("#FFFFFF") @db.VarChar(7)
-  theme_background_color String         @default("#F9FAFB") @db.VarChar(7)
-  theme_layout           String         @default("standard") @db.VarChar(50)
-  theme_font             String         @default("inter") @db.VarChar(50)
-  is_active              Boolean        @default(true)
+  id                     Int                 @id @default(autoincrement())
+  user_id                Int                 @unique(map: "uq_calling_cards_user")
+  full_name              String              @db.VarChar(100)
+  job_title              String?             @db.VarChar(100)
+  company                String?             @db.VarChar(100)
+  headline               String?             @db.VarChar(255)
+  address                String?             @db.Text
+  profile_image_url      String?             @db.VarChar(512)
+  cover_image_url        String?             @db.VarChar(512)
+  bio_label              String?             @db.VarChar(50)
+  bio_text               String?             @db.Text
+  contact_value          String?             @db.VarChar(255)
+  contact_action_type    ContactAction?      @default(both)
+  slug                   String              @unique(map: "slug") @db.VarChar(50)
+  sharing_id             String              @unique(map: "sharing_id") @db.Char(36)
+  theme_primary_color    String?             @default("#000000") @db.VarChar(7)
+  theme_secondary_color  String?             @default("#FFFFFF") @db.VarChar(7)
+  theme_text_color       String?             @default("#FFFFFF") @db.VarChar(7)
+  theme_background_color String?             @default("#F9FAFB") @db.VarChar(7)
+  theme_layout           String?             @default("standard") @db.VarChar(50)
+  theme_font             String?             @default("inter") @db.VarChar(50)
+  bios                   Json?
+  contacts               Json?
+  is_active              Boolean?            @default(true)
   created_by             Int?
   updated_by             Int?
-  deleted_at             DateTime?      @db.Timestamp(0)
+  deleted_at             DateTime?           @db.Timestamp(0)
   deleted_by             Int?
-  created_at             DateTime       @default(now()) @db.Timestamp(0)
-  updated_at             DateTime       @updatedAt @db.Timestamp(0)
+  created_at             DateTime?           @default(now()) @db.Timestamp(0)
+  updated_at             DateTime?           @default(now()) @updatedAt @db.Timestamp(0)
+
   bank_details           BankDetail[]
-  creator                User?          @relation("CardCreatedBy", fields: [created_by], references: [id])
-  deleterUser            User?          @relation("CardDeletedBy", fields: [deleted_by], references: [id])
-  updaterUser            User?          @relation("CardUpdatedBy", fields: [updated_by], references: [id])
-  user                   User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user                   User                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "calling_cards_ibfk_1")
+  creator                User?               @relation("CardCreatedBy", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_cards_created_by")
+  deleterUser            User?               @relation("CardDeletedBy", fields: [deleted_by], references: [id], onUpdate: NoAction, map: "fk_cards_deleted_by")
+  updaterUser            User?               @relation("CardUpdatedBy", fields: [updated_by], references: [id], onUpdate: NoAction, map: "fk_cards_updated_by")
   analytics              CardAnalytic[]
+  connections            connections[]
   external_links         ExternalLink[]
   physical_cards         PhysicalCard[]
   social_links           SocialLink[]
   video_links            VideoLink[]
-  additional_contacts    AdditionalContact[]
-  additional_bios        AdditionalBio[]
 
-  @@index([created_by], map: "calling_cards_created_by_fkey")
-  @@index([deleted_by], map: "calling_cards_deleted_by_fkey")
-  @@index([updated_by], map: "calling_cards_updated_by_fkey")
+  @@index([created_by], map: "fk_cards_created_by")
+  @@index([deleted_by], map: "fk_cards_deleted_by")
+  @@index([updated_by], map: "fk_cards_updated_by")
   @@map("calling_cards")
 }
 
@@ -101,10 +104,10 @@ model BankDetail {
   account_name    String      @db.VarChar(100)
   account_number  String      @db.VarChar(50)
   branch_code     String?     @db.VarChar(20)
-  display_order   Int         @default(0)
-  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+  display_order   Int?        @default(0)
+  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_bank_details_card")
 
-  @@index([calling_card_id], map: "bank_details_calling_card_id_fkey")
+  @@index([calling_card_id], map: "fk_bank_details_card")
   @@map("bank_details")
 }
 
@@ -114,10 +117,10 @@ model SocialLink {
   platform        String      @db.VarChar(50)
   url             String      @db.VarChar(512)
   handle          String?     @db.VarChar(100)
-  display_order   Int         @default(0)
-  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+  display_order   Int?        @default(0)
+  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_social_links_card")
 
-  @@index([calling_card_id], map: "social_links_calling_card_id_fkey")
+  @@index([calling_card_id], map: "fk_social_links_card")
   @@map("social_links")
 }
 
@@ -128,10 +131,10 @@ model VideoLink {
   url             String      @db.Text
   thumbnail_url   String?     @db.VarChar(512)
   description     String?     @db.Text
-  display_order   Int         @default(0)
-  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+  display_order   Int?        @default(0)
+  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_video_links_card")
 
-  @@index([calling_card_id], map: "video_links_calling_card_id_fkey")
+  @@index([calling_card_id], map: "fk_video_links_card")
   @@map("video_links")
 }
 
@@ -140,56 +143,33 @@ model ExternalLink {
   calling_card_id Int
   label           String      @db.VarChar(100)
   url             String      @db.VarChar(512)
-  display_order   Int         @default(0)
-  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
+  display_order   Int?        @default(0)
+  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_external_links_card")
 
-  @@index([calling_card_id], map: "external_links_calling_card_id_fkey")
+  @@index([calling_card_id], map: "fk_external_links_card")
   @@map("external_links")
 }
 
-model AdditionalContact {
-  id              Int           @id @default(autoincrement())
-  calling_card_id Int
-  label           String?       @db.VarChar(50)
-  value           String        @db.VarChar(255)
-  action_type     ContactAction @default(both)
-  display_order   Int           @default(0)
-  calling_card    CallingCard   @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
 
-  @@index([calling_card_id], map: "additional_contacts_calling_card_id_fkey")
-  @@map("additional_contacts")
-}
-
-model AdditionalBio {
-  id              Int         @id @default(autoincrement())
-  calling_card_id Int
-  label           String?     @db.VarChar(50)
-  text            String      @db.Text
-  display_order   Int         @default(0)
-  calling_card    CallingCard @relation(fields: [calling_card_id], references: [id], onDelete: Cascade)
-
-  @@index([calling_card_id], map: "additional_bios_calling_card_id_fkey")
-  @@map("additional_bios")
-}
 
 model PhysicalCard {
-  card_id         Int                @id @default(autoincrement())
-  card_uid        String             @unique(map: "uq_physical_cards_uid") @db.VarChar(100)
-  card_type       String             @default("generic") @db.VarChar(50)
+  card_id         Int                 @id @default(autoincrement())
+  card_uid        String              @unique(map: "uq_physical_cards_uid") @db.VarChar(100)
+  card_type       String?             @default("generic") @db.VarChar(50)
   created_by      Int?
   updated_by      Int?
   deleted_by      Int?
   calling_card_id Int?
-  status          PhysicalCardStatus @default(unassigned)
-  assigned_at     DateTime?          @db.Timestamp(0)
-  activated_at    DateTime?          @db.Timestamp(0)
-  created_at      DateTime           @default(now()) @db.Timestamp(0)
-  updated_at      DateTime           @updatedAt @db.Timestamp(0)
-  deleted_at      DateTime?          @db.Timestamp(0)
-  calling_card    CallingCard?       @relation(fields: [calling_card_id], references: [id])
-  creator         User?              @relation("PhysicalCreatedBy", fields: [created_by], references: [id])
-  deleterUser     User?              @relation("PhysicalDeletedBy", fields: [deleted_by], references: [id])
-  updaterUser     User?              @relation("PhysicalUpdatedBy", fields: [updated_by], references: [id])
+  status          PhysicalCardStatus? @default(unassigned)
+  assigned_at     DateTime?           @db.Timestamp(0)
+  activated_at    DateTime?           @db.Timestamp(0)
+  created_at      DateTime?           @default(now()) @db.Timestamp(0)
+  updated_at      DateTime?           @default(now()) @updatedAt @db.Timestamp(0)
+  deleted_at      DateTime?           @db.Timestamp(0)
+  calling_card    CallingCard?        @relation(fields: [calling_card_id], references: [id], onUpdate: NoAction, map: "fk_physical_cards_calling_card")
+  creator         User?               @relation("PhysicalCreatedBy", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_physical_cards_created_by")
+  deleterUser     User?               @relation("PhysicalDeletedBy", fields: [deleted_by], references: [id], onUpdate: NoAction, map: "fk_physical_cards_deleted_by")
+  updaterUser     User?               @relation("PhysicalUpdatedBy", fields: [updated_by], references: [id], onUpdate: NoAction, map: "fk_physical_cards_updated_by")
 
   @@index([created_by], map: "idx_physical_cards_created_by")
   @@index([updated_by], map: "idx_physical_cards_updated_by")
@@ -202,29 +182,43 @@ model CardAnalytic {
   id           Int         @id @default(autoincrement())
   card_id      Int
   viewer_ip    String?     @db.VarChar(45)
-  created_at   DateTime    @default(now()) @db.Timestamp(0)
-  updated_at   DateTime    @updatedAt @db.Timestamp(0)
+  created_at   DateTime?   @default(now()) @db.Timestamp(0)
+  updated_at   DateTime?   @default(now()) @updatedAt @db.Timestamp(0)
   deleted_at   DateTime?   @db.Timestamp(0)
-  viewed_at    DateTime    @default(now()) @db.Timestamp(0)
-  calling_card CallingCard @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  viewed_at    DateTime?   @default(now()) @db.Timestamp(0)
+  calling_card CallingCard @relation(fields: [card_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_analytics_card")
 
   @@index([card_id], map: "idx_analytics_card")
   @@map("card_analytics")
 }
 
-model AdminLog {
-  id          Int      @id @default(autoincrement())
-  admin_id    Int
-  action      String   @db.VarChar(100)
-  target_type String   @db.VarChar(50)
-  target_id   String?  @db.VarChar(100)
-  details     String?  @db.Text
-  ip_address  String?  @db.VarChar(45)
-  created_at  DateTime @default(now()) @db.Timestamp(0)
-  admin       User     @relation("AdminLogBy", fields: [admin_id], references: [id], onDelete: Cascade)
+model connections {
+  id            Int         @id @default(autoincrement())
+  card_id       Int
+  visitor_name  String      @db.VarChar(100)
+  visitor_email String      @db.VarChar(255)
+  visitor_phone String?     @db.VarChar(20)
+  created_at    DateTime?   @default(now()) @db.Timestamp(0)
+  updated_at    DateTime?   @default(now()) @db.Timestamp(0)
+  deleted_at    DateTime?   @db.Timestamp(0)
+  calling_cards CallingCard @relation(fields: [card_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_connections_card")
 
-  @@index([admin_id], map: "idx_admin_logs_admin")
+  @@index([card_id], map: "idx_connections_card")
+}
+
+model AdminLog {
+  id          Int       @id @default(autoincrement())
+  admin_id    Int
+  action      String    @db.VarChar(100)
+  target_type String    @db.VarChar(50)
+  target_id   String?   @db.VarChar(100)
+  details     String?   @db.Text
+  ip_address  String?   @db.VarChar(45)
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+  admin       User      @relation("AdminLogBy", fields: [admin_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_admin_logs_admin")
+
   @@index([action], map: "idx_admin_logs_action")
+  @@index([admin_id], map: "idx_admin_logs_admin")
   @@map("admin_logs")
 }
 

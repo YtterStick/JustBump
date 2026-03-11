@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Portal from '../../../../components/admin/Portal';
 import Pagination from '../../../../components/admin/Pagination';
@@ -451,41 +451,53 @@ function RegisterUserModal({ onClose, onSuccess }: { onClose: () => void; onSucc
 }
 
 function LinkCardModal({ user, onClose, onLinked }: { user: { id: number; email: string }; onClose: () => void; onLinked: () => void }) {
-    const [inputValue, setInputValue] = useState('');
     const [loading, setLoading] = useState(false);
+    const [fetchingCards, setFetchingCards] = useState(true);
+    const [availableCards, setAvailableCards] = useState<{ card_id: number; card_uid: string; card_type: string }[]>([]);
+    const [selectedUids, setSelectedUids] = useState<Set<string>>(new Set());
+    const [searchTerm, setSearchTerm] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
-    const parsed = useMemo(() => {
-        const val = inputValue.trim();
-        if (!val) return { mode: 'empty', uids: [] };
+    // Fetch unassigned cards on mount
+    useEffect(() => {
+        fetch('/api/admin/physical-cards?status=unassigned')
+            .then(res => res.json())
+            .then(data => {
+                setAvailableCards(Array.isArray(data) ? data : []);
+                setFetchingCards(false);
+            })
+            .catch(() => {
+                setError('Failed to load available cards');
+                setFetchingCards(false);
+            });
+    }, []);
 
-        const rangeMatch = val.match(/^(\d+)\s*-\s*(\d+)$/);
-        if (rangeMatch) {
-            const startNum = parseInt(rangeMatch[1], 10);
-            const endNum = parseInt(rangeMatch[2], 10);
-            const maxLen = Math.max(rangeMatch[1].length, rangeMatch[2].length, 4);
+    const filteredCards = availableCards.filter(c =>
+        c.card_uid.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.card_type.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-            if (endNum < startNum) return { mode: 'invalid', message: 'End must be ≥ Start', uids: [] };
-            if (endNum - startNum > 49) return { mode: 'invalid', message: 'Max 50 cards at once', uids: [] };
+    const toggleCard = (uid: string) => {
+        setSelectedUids(prev => {
+            const next = new Set(prev);
+            if (next.has(uid)) next.delete(uid);
+            else next.add(uid);
+            return next;
+        });
+    };
 
-            const uids = [];
-            for (let i = startNum; i <= endNum; i++) {
-                uids.push(String(i).padStart(maxLen, '0'));
-            }
-            return { mode: 'batch', uids };
+    const selectAll = () => {
+        if (selectedUids.size === filteredCards.length) {
+            setSelectedUids(new Set());
+        } else {
+            setSelectedUids(new Set(filteredCards.map(c => c.card_uid)));
         }
-
-        if (/^\d+$/.test(val)) {
-            return { mode: 'single', uids: [val.padStart(4, '0')] };
-        }
-
-        return { mode: 'invalid', message: 'Enter a number or range (e.g. 0022-0024)', uids: [] };
-    }, [inputValue]);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (parsed.mode === 'invalid' || parsed.uids.length === 0) return;
+        if (selectedUids.size === 0) return;
 
         setLoading(true);
         setError('');
@@ -495,7 +507,7 @@ function LinkCardModal({ user, onClose, onLinked }: { user: { id: number; email:
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    card_uids: parsed.uids,
+                    card_uids: Array.from(selectedUids),
                     user_id: user.id
                 }),
             });
@@ -513,11 +525,13 @@ function LinkCardModal({ user, onClose, onLinked }: { user: { id: number; email:
         }
     };
 
+    const typeIcon: Record<string, string> = { Card: '🪪', Sticker: '🏷️', Keychain: '🔑', Other: '📦' };
+
     return (
         <Portal>
             <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
                 <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
-                <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100">
+                <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100 flex flex-col max-h-[90vh]">
                     {success ? (
                         <div className="p-12 text-center animate-in zoom-in duration-300">
                             <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -526,14 +540,14 @@ function LinkCardModal({ user, onClose, onLinked }: { user: { id: number; email:
                                 </svg>
                             </div>
                             <h3 className="text-xl font-bold text-gray-900">Cards Linked!</h3>
-                            <p className="text-sm text-gray-400 mt-2">{parsed.uids.length} physical card(s) have been successfully assigned to {user.email}.</p>
+                            <p className="text-sm text-gray-400 mt-2">{selectedUids.size} physical card(s) have been successfully assigned to {user.email}.</p>
                         </div>
                     ) : (
                         <>
-                            <div className="p-6 border-b border-gray-100 bg-brand-50/10">
+                            <div className="p-6 border-b border-gray-100 bg-brand-50/10 flex-shrink-0">
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="px-2 py-1 bg-brand-100 text-brand-700 rounded-lg text-[10px] font-bold uppercase tracking-wider">
-                                        Batch Linking
+                                        Link Cards
                                     </div>
                                     <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all">
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -548,54 +562,103 @@ function LinkCardModal({ user, onClose, onLinked }: { user: { id: number; email:
                                 </div>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                                <div>
-                                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Card UID or Range</label>
+                            <form onSubmit={handleSubmit} className="flex flex-col">
+                                {/* Search */}
+                                <div className="px-6 pt-5 pb-3 flex-shrink-0">
                                     <div className="relative">
-                                        <input
-                                            type="text"
-                                            required
-                                            autoFocus
-                                            className={`w-full px-4 py-4 rounded-2xl border-2 text-lg font-mono tracking-widest focus:outline-none transition-all placeholder:text-gray-200 ${parsed.mode === 'invalid'
-                                                ? 'border-red-100 bg-red-50/30'
-                                                : 'border-gray-100 focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500'
-                                                }`}
-                                            placeholder="XXXX or XXXX-XXXX"
-                                            value={inputValue}
-                                            onChange={(e) => setInputValue(e.target.value)}
-                                        />
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                            <svg className={`w-6 h-6 transition-colors ${parsed.mode === 'invalid' ? 'text-red-300' : 'text-gray-200'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                            <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                             </svg>
                                         </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Search by UID or type..."
+                                            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/10 focus:border-brand-500 transition-all placeholder:text-gray-300"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
                                     </div>
-                                    {parsed.mode === 'invalid' ? (
-                                        <p className="mt-2 text-[10px] text-red-500 font-bold italic animate-in slide-in-from-left-1">{parsed.message}</p>
-                                    ) : (
-                                        <p className="mt-2 text-[10px] text-gray-400 italic">Enter a single UID (e.g. 0001) or a range (e.g. 0022-0024).</p>
+                                </div>
+
+                                {/* Available Cards Header + Select All */}
+                                <div className="px-6 pb-2 flex items-center justify-between flex-shrink-0">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                        Available ({filteredCards.length})
+                                    </span>
+                                    {filteredCards.length > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={selectAll}
+                                            className="text-[10px] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-wider transition-colors"
+                                        >
+                                            {selectedUids.size === filteredCards.length ? 'Deselect All' : 'Select All'}
+                                        </button>
                                     )}
                                 </div>
 
-                                {parsed.uids.length > 0 && parsed.mode !== 'invalid' && (
-                                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                                        <div className="flex items-center justify-between px-1">
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                Preview ({parsed.uids.length} Card{parsed.uids.length > 1 ? 's' : ''})
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1 scrollbar-hide">
-                                            {parsed.uids.map(uid => (
-                                                <span key={uid} className="px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[10px] font-mono font-bold text-gray-600 shadow-sm">
-                                                    {uid}
-                                                </span>
+                                {/* Card list */}
+                                <div className="px-6 overflow-y-auto max-h-[224px]">
+                                    {fetchingCards ? (
+                                        <div className="space-y-2">
+                                            {[1, 2, 3, 4].map(i => (
+                                                <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl animate-pulse">
+                                                    <div className="w-4 h-4 rounded bg-gray-200" />
+                                                    <div className="h-4 w-16 bg-gray-200 rounded" />
+                                                    <div className="h-3 w-12 bg-gray-100 rounded ml-auto" />
+                                                </div>
                                             ))}
                                         </div>
-                                    </div>
-                                )}
+                                    ) : filteredCards.length === 0 ? (
+                                        <div className="py-8 text-center">
+                                            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                                <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-sm font-medium text-gray-900">No available cards</p>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {searchTerm ? 'No cards match your search.' : 'All cards are currently assigned. Register new cards first.'}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-1.5">
+                                            {filteredCards.map(card => {
+                                                const isSelected = selectedUids.has(card.card_uid);
+                                                return (
+                                                    <label
+                                                        key={card.card_id}
+                                                        className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected
+                                                            ? 'border-brand-300 bg-brand-50/50'
+                                                            : 'border-transparent bg-gray-50 hover:border-gray-200 hover:bg-gray-100/50'
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isSelected}
+                                                            onChange={() => toggleCard(card.card_uid)}
+                                                            className="sr-only"
+                                                        />
+                                                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'border-brand-500 bg-brand-500' : 'border-gray-300 bg-white'}`}>
+                                                            {isSelected && (
+                                                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            )}
+                                                        </div>
+                                                        <code className="text-sm font-semibold text-gray-900 tracking-wide font-mono">{card.card_uid}</code>
+                                                        <span className="ml-auto text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center gap-1">
+                                                            {typeIcon[card.card_type] || '📦'} {card.card_type}
+                                                        </span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
 
                                 {error && (
-                                    <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-xs font-semibold flex items-center gap-3 animate-head-shake">
+                                    <div className="mx-6 mt-3 p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-xs font-semibold flex items-center gap-3 animate-head-shake flex-shrink-0">
                                         <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
@@ -603,10 +666,35 @@ function LinkCardModal({ user, onClose, onLinked }: { user: { id: number; email:
                                     </div>
                                 )}
 
-                                <div className="flex flex-col gap-3">
+                                <div className="px-6 pt-6 pb-6 flex flex-col gap-3 flex-shrink-0 border-t border-gray-100 mt-3">
+                                    {/* Selected preview — single row horizontal scroll so buttons stay visible */}
+                                    {selectedUids.size > 0 && (
+                                        <div className="flex items-center gap-2 pb-1 min-w-0">
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap flex-shrink-0">{selectedUids.size} Selected:</span>
+                                            <div className="flex gap-1.5 overflow-x-auto flex-1 min-w-0 pb-1 scrollbar-hide">
+                                                {Array.from(selectedUids).map(uid => (
+                                                    <span
+                                                        key={uid}
+                                                        className="inline-flex items-center gap-1 px-2 py-1 bg-brand-50 border border-brand-100 rounded-lg text-[10px] font-mono font-bold text-brand-700 whitespace-nowrap flex-shrink-0"
+                                                    >
+                                                        {uid}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => toggleCard(uid)}
+                                                            className="text-brand-400 hover:text-brand-600 transition-colors"
+                                                        >
+                                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                     <button
                                         type="submit"
-                                        disabled={loading || parsed.mode === 'invalid' || parsed.uids.length === 0}
+                                        disabled={loading || selectedUids.size === 0}
                                         className="w-full py-4 bg-emerald-600 text-white rounded-2xl text-sm font-bold hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xl shadow-emerald-100 active:scale-[0.98]"
                                     >
                                         {loading ? (
@@ -617,14 +705,14 @@ function LinkCardModal({ user, onClose, onLinked }: { user: { id: number; email:
                                                 </svg>
                                                 Linking...
                                             </span>
-                                        ) : `Link ${parsed.uids.length} Card${parsed.uids.length !== 1 ? 's' : ''}`}
+                                        ) : `Link ${selectedUids.size} Card${selectedUids.size !== 1 ? 's' : ''}`}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={onClose}
                                         className="w-full py-4 bg-white text-gray-500 rounded-2xl text-sm font-bold hover:text-gray-700 transition-all border border-gray-100"
                                     >
-                                        Skip for Now
+                                        Cancel
                                     </button>
                                 </div>
                             </form>

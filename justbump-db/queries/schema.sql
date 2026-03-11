@@ -1,18 +1,33 @@
 CREATE DATABASE IF NOT EXISTS jbdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 ALTER DATABASE jbdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE jbdb;
 
 SET FOREIGN_KEY_CHECKS = 0;
+
 DROP TABLE IF EXISTS connections;
+
 DROP TABLE IF EXISTS card_analytics;
+
+DROP TABLE IF EXISTS admin_logs;
+
 DROP TABLE IF EXISTS physical_cards;
+
+DROP TABLE IF EXISTS additional_bios;
+
 DROP TABLE IF EXISTS bank_details;
+
 DROP TABLE IF EXISTS social_links;
+
 DROP TABLE IF EXISTS video_links;
+
 DROP TABLE IF EXISTS external_links;
+
 DROP TABLE IF EXISTS calling_cards;
+
 DROP TABLE IF EXISTS users;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE users (
@@ -41,6 +56,20 @@ CREATE TABLE users (
     CONSTRAINT fk_users_deleted_by FOREIGN KEY (deleted_by) REFERENCES users (id) ON DELETE SET NULL
 );
 
+CREATE TABLE admin_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    target_type VARCHAR(50) NOT NULL,
+    target_id VARCHAR(100) DEFAULT NULL,
+    details TEXT,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_admin_logs_admin (admin_id),
+    INDEX idx_admin_logs_action (action),
+    CONSTRAINT fk_admin_logs_admin FOREIGN KEY (admin_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
 CREATE TABLE calling_cards (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -50,6 +79,7 @@ CREATE TABLE calling_cards (
     headline VARCHAR(255) DEFAULT NULL,
     address TEXT,
     profile_image_url VARCHAR(512) DEFAULT NULL,
+    cover_image_url VARCHAR(512) DEFAULT NULL,
     bio_label VARCHAR(50) DEFAULT NULL,
     bio_text TEXT,
     contact_value VARCHAR(255) DEFAULT NULL,
@@ -58,7 +88,12 @@ CREATE TABLE calling_cards (
     sharing_id CHAR(36) NOT NULL,
     theme_primary_color VARCHAR(7) DEFAULT '#000000',
     theme_secondary_color VARCHAR(7) DEFAULT '#FFFFFF',
+    theme_text_color VARCHAR(7) DEFAULT '#FFFFFF',
     theme_background_color VARCHAR(7) DEFAULT '#F9FAFB',
+    theme_layout VARCHAR(50) DEFAULT 'standard',
+    theme_font VARCHAR(50) DEFAULT 'inter',
+    bios JSON DEFAULT NULL,
+    contacts JSON DEFAULT NULL,
     is_active TINYINT(1) DEFAULT 1,
     created_by INT NULL,
     updated_by INT NULL,
@@ -124,7 +159,12 @@ CREATE TABLE physical_cards (
     updated_by INT NULL,
     deleted_by INT NULL,
     calling_card_id INT NULL,
-    status ENUM('unassigned', 'assigned', 'active', 'blocked') DEFAULT 'unassigned',
+    status ENUM(
+        'unassigned',
+        'assigned',
+        'active',
+        'blocked'
+    ) DEFAULT 'unassigned',
     assigned_at TIMESTAMP NULL DEFAULT NULL,
     activated_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -165,5 +205,3 @@ CREATE TABLE connections (
     INDEX idx_connections_card (card_id),
     CONSTRAINT fk_connections_card FOREIGN KEY (card_id) REFERENCES calling_cards (id) ON DELETE CASCADE
 );
-
-

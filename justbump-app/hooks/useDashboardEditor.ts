@@ -25,7 +25,7 @@ export function useDashboardEditor() {
                     social_links: data.social_links || [],
                     video_links: data.video_links || [],
                     additional_contacts: data.additional_contacts || [],
-                    additional_bios: data.additional_bios || [],
+                    bios: data.bios || [],
                     external_links: data.external_links || [],
                     bank_details: data.bank_details || []
                 };

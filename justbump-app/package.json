@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "next start -p 3000",
+    "start": "next start -p 3001",
     "lint": "next lint",
     "apply-schema": "node ./scripts/apply-schema.js",
     "create-jbdb": "node ./scripts/create-jbdb.js",
@@ -22,10 +22,10 @@
     "jsonwebtoken": "^9.0.0",
     "libphonenumber-js": "^1.12.38",
     "mysql2": "^3.3.0",
-    "next": "13.4.12",
+    "next": "^14.2.35",
     "qrcode.react": "^4.2.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
